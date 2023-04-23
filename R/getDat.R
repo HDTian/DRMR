@@ -2,7 +2,7 @@
 
 ###
 
-###
+###aaaaaa
 
 getDat<-function(N=10000,
                  IVtype='cont',   #'cont' 'bi' 'high-dim'
