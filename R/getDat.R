@@ -2,7 +2,7 @@
 
 ###
 
-###Get a Toy data
+###
 
 getDat<-function(N=10000,
                  IVtype='cont',   #'cont' 'bi' 'high-dim'
@@ -25,7 +25,7 @@ getDat<-function(N=10000,
 
 
   U1<-rnorm(N,0,1)
-  U2<-rnorm(N,0,1)   #U epsilon ͬ��
+  U2<-rnorm(N,0,1)   #U epsilon Í¬×÷
   U3<-rnorm(N,0,1)
 
 
