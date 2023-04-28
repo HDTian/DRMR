@@ -24,9 +24,14 @@ a value indicates the number of stratum to be built.
   \item{SoP}{
 a value indicates the size of pre-stratum. Default size of pre-stratum is equal to the number stratum.
 }
+ \item{seed}{
+a value of seed for reproducibility. Default value is \code{seed=NA}.
+}
 }
 \details{
 `Stratify` does not require the pre-stratum or stratum has the equal size, so no need to drop individuals. Even if 'nrow(dat)/Ns' or `nrow(dat)/SoP` is not an integer, stratification still works. One can let `SoP>Ns`, which will help to increase the stability of the doubly-ranked stratification results.
+
+Note that the \code{Stratify} function will not induce internal randomness autonomously, in the sense that the same inputted data will always return the same output, so no worries about the reproducibility even you forget to fix seed. The argument \code{seed} help to induce internal randomness when the data contains the fixed instrument or exposure values.
 }
 \value{
 `Stratify` returns the same data as `dat` with augmented stratificaiton information. The new columns `Rstratum`, `pre_stratum` and `DRstratum` represents the residual stratification results, the pre-stratum, and the doubly-ranked stratification results rexpectively.
