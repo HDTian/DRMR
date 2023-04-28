@@ -76,7 +76,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
           if(abs(bx)<bxthre ){  #即，bx过小，可能产生inf项目，所以此时直接用NA代替
             MRfitting<-rbind(MRfitting, c(NA,NA,by,byse,NA,NA))
           }else{
-            MRres<-mr_ivw(mr_input(bx, bxse, by, byse))
+            MRres<-mr_ivw(mr_input(bx, bxse, by, byse)) #chekced! same as the 2SLS;    易理解，IVW唯一的变数在于random-effect;而single IV的情况random-effect肯定超过1；因为此时SEE=0呀
             MRfitting<-rbind(MRfitting, c(bx,bxse,by,byse,MRres@Estimate,MRres@StdError))
           }
         }

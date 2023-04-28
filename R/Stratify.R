@@ -1,6 +1,6 @@
 ###Stratification
 
-#×¢Òâ£º Stratify()Õâ¸öº¯ÊıÊÇÃ»ÓĞrandomnessµÄ£¡ËùÒÔ¶ÔÓÚDR mthod (Residual methodÒ×ÖªÎÈ¶¨ĞÔºÜ¸ß)£º
+#×¢Òâ£º Stratify()Õâ¸öº¯ÊıÊÇÃ»ÓĞrandomnessµÄ£¡ËùÒÔ¶ÔÓÚDR method (Residual methodÒ×ÖªÎÈ¶¨ĞÔºÜ¸ß)£º
 #Èç¹ûÏëÓÃsame-value IV (eg binary IV)Ëæ»úĞÔ£»datÔÚÖ®Ç°¾ÍÒª´òÂÒÅÅĞòÒ»´Î
 #Èç¹ûÊÇÔÚcontinuous IV + same-valued exposureÏÂÌåÏÖËæ»úĞÔ£¬ÄÇÃ´×î¿ªÊ¼´òÂÒÊÇÃ»ÓÃµÄ£¬ÒòÎªÒ»¶¨»á°´ÕÕIVµÄË³ĞòÅÅX
 #´ËÊ±Ò»ÖÖ½â¾ö·½°¸ÊÇ¸ø¸øsame-valued exposureÔö¼ÓÒ»¸öÌØ±ğÏ¸Ï¸Ï¸Î¢µÄÈÅ¶¯Öµ
@@ -13,11 +13,15 @@
 Stratify<-function(dat,  #must be a data frame   contains $Z $X $Y $M (Ò»µ©ÉèÖÃÁË£¬¾Í»áÓÃÕâ¸ö); no missing data
                    onExposure=TRUE,  #TRUE for exposure; otherwise/FALSE on $M
                    Ns=10, #the number of (final) stratum
-                   SoP=NA){
+                   SoP=NA,
+                   seed=NA){
+
   #dat check
   if(!is.data.frame(dat)){ stop('Your inputted data is not a dataframe')  }
   if( is.null(dat$Z) ){stop('No Z detected!: The column of the instrument should be named as Z') }
   if( is.null(dat$X) ){stop('No X detected!: The column of the exposure should be named as X') }
+
+
 
   #other logic check
   if( (!onExposure)&(is.null(dat$M)) ){
@@ -32,6 +36,18 @@ Stratify<-function(dat,  #must be a data frame   contains $Z $X $Y $M (Ò»µ©ÉèÖÃÁ
 
   #missing data check
   if( sum( is.na(dat) )!= 0  ){ stop( 'Missing data exists, please clean the data first'  ) }
+
+  #permutation or not?
+  if(!is.na(seed)){
+    set.seed(seed)
+    per_index<-sample(  1:nrow(dat),nrow(dat)  )
+    dat<-dat[per_index,]  #permutation here is to induce randomness for same-valued IV
+    Mvalues<-sort(as.numeric(levels( factor( dat$M )  )) )  #possible M values
+    Mdif<- min( Mvalues[-1] - head(Mvalues,-1) ) #minimal difference between non-same M values
+    dat$Merror<-runif(  nrow(dat), -Mdif/2, Mdif/2 ) #the M error will not affect the rank at all
+    dat$Msave<-dat$M
+    dat$M<-dat$M+dat$Merror #Ö®ºó»á¼õÈ¥
+  }
 
   N<-nrow(dat)
 
@@ -68,6 +84,11 @@ Stratify<-function(dat,  #must be a data frame   contains $Z $X $Y $M (Ò»µ©ÉèÖÃÁ
   dat_order<-arrange(  temp ,pre_stratum ) #¼´£¬±£Ö¤pre_strata°´Ë³ĞòÅÅÁĞ£¬²¢ÇÒÃ¿¸öpre_strataÖĞµÄÄ¿±êÁ¿¶¼ÊÇÉıĞò
 
   dat_order$DRstratum<-as.vector( unlist(sapply( as.numeric(table( dat_order$pre_stratum )) , function(x) sort(rep(1:Ns,length.out=x)) )   ) )
+
+  if(!is.na(seed)){
+    dat_order$M<-dat_order$Msave  #back to the original M
+    dat_order<-dat_order[ , !(names(dat_order) %in% c('Merror','Msave'))] #remove the Merror and Msave column
+  }
 
   return(dat_order)
 }
