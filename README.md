@@ -61,7 +61,7 @@ getSummaryInf( rdat,target=FALSE,onlyDR=TRUE)
 ```
 For residual stratification, it is equivalent to applying the naive stratification wrt the residual variables
 ```R
-dat$M<-dat$X-lm(  dat$X~dat$Z   )$fitted  #obtain the residual variables first
+dat$M<-resid(lm(  dat$X~dat$Z   )) #obtain the residual variables first
 rdat<-Stratify(dat,SoP=nrow(dat),onExposure=FALSE) 
 getSummaryInf( rdat,target=FALSE,onlyDR=TRUE)
 ```
