@@ -120,7 +120,7 @@ You may consider transformed exposures or covariates[^trans]. The transformed va
 ## Smoothing
 There are several methods for smoothing the stratification estimation (the stratum-specific estimates are called LACE), including the fractional polynomial method and the piecewise linear method[^smoothing].
 
-To use the fractional polynomial method (e.g. with degree 2), run
+To use the fractional polynomial method (e.g. with degree 2) with the doubly-ranked stratification, run
 ```R
 smooth_res<-Smooth(RES$DRres,Norder=3,baseline=0) #RES is the result returned by getSummaryInf()
 ```
@@ -132,7 +132,7 @@ If you wish to visualize the results, simply run `smooth_res$p ` or `smooth_res$
 
 
 
-To use the piecewise linear method, run:
+To use the piecewise linear method with the doubly-ranked stratification, run:
 ```R
 cutting_values<-(RES$DRres$mean[-1] + head( RES$DRres$mean,-1) )/2
 smooth_res<-Smooth(RES$DRres,Norder=1,baseline=0,Knots=cutting_values)
