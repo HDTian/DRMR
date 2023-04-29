@@ -104,12 +104,11 @@ dat$Z<-lm(  dat$X~ dat$G1+ dat$G2 + ...   )$fitted  #G1 G2 ... are genetic varia
 ```
 
 ## Control the randomness and reproducibility
-One feature of the stratification in the DRMR package is that the stratification function will not introduce randomness (in the sense that the same input data will always generate consistent stratification results)[^randomness]. This is beneficial in terms of transparency and reproducibility. However, since ties are broken at random for constant instrument or exposure values, the randomness of such breaks needs to be created before running `Stratify()`. For example, you can add negligible errors to the variable column containing constant values to induce randomness.
+One feature of the stratification in the DRMR package is that the stratification function will not introduce randomness (in the sense that the same input data will always generate the same stratification results)[^randomness]. This is beneficial in terms of transparency and reproducibility. However, since ties are broken at random for constant instrument or exposure values, the randomness of such breaks may be considered in some analysis. You can use the argument `seed` to creat and track the randomness, For example:  
 ```R
-set.seed(1) #track 
-dat$Z<-dat$Z+rnorm(nrow(dat),0,1e-10 )  #when the instrument is discrete-valued
-dat$X<-dat$X+rnorm(nrow(dat),0,1e-10 )  #when the exposure is discrete (eg coarsened)
-Stratify(dat) #then run the DR stratification
+Stratify(dat)
+Stratify(dat,seed=1)
+Stratify(dat,seed=2)
  ```
 [^randomness]: I considered whether to have the function perform break permutation automatically, but I decided against it as it might result in the user losing control over the variation of results caused by the randomness introduced internally (e.g., if they tend not to set a seed). Although these variations often do not affect any conclusions, I removed the randomness from inside the function to ensure transparency and reproducibility.
        
