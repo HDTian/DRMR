@@ -41,6 +41,8 @@ Draw the doubly-ranked stratification (use `?Stratify` to check the parameters f
 rdat<-Stratify(dat) 
 RES<-getSummaryInf( rdat,target=FALSE)
 head(RES$DRres)
+```
+```R
 #          size        min        1q      mean        3q        max       bx       bxse         by       byse        est         se target
 #Stratum 1 1000 -15.555421 -8.660667 -7.427431 -6.035485 -1.3493712 1.066652 0.12171101 -1.4378919 0.17301791 -1.3480425 0.16220656     NA
 #Stratum 2 1000 -10.439764 -6.721907 -5.691190 -4.521686 -0.7632903 1.158202 0.09373183 -1.3370736 0.10698333 -1.1544386 0.09237015     NA
@@ -80,6 +82,9 @@ getSummaryInf( rdat,target=FALSE)
 The coarsened exposure refers to the exposure measured with discrete values that are considered as an approximation for its latent continuous values. Such values could be rounded, binned into categories, or truncated, and all of them should satisfy the rank preserving condition[^444]. The properties of such coarsened exposure enable the use of doubly-ranked stratification, but extra assessment for the degree of coarseness should be done before stratification. One way to do this is by calculating the Gelman-Rubin uniformity values of the rank index in each stratum. You can run the following code to perform this assessment.
 ```R
 getGRstats(rdat)
+
+```
+```R
 #      Stratum     GR_low  GR_up   maxGR  
 #      "Stratum1"  "1"     "1.001" "1.001"
 #      "Stratum2"  "1.001" "1"     "1.001"
