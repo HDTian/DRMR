@@ -63,7 +63,7 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   Bs<-create.bspline.basis(  c(Rall[1],Rall[2])  ,
                              breaks=c(  Rall[1],  internal_knots ,  Rall[2] ) ,
                              norder=Norder )
-  Par <- fdPar( fdobj=Bs, Lfdobj=NULL, lambda=Lambda )#都默认不用penalty;这里应该没问�?
+  Par <- fdPar( fdobj=Bs, Lfdobj=NULL, lambda=Lambda )#都默认不用penalty;这里应该没问???
   smoothed_LACE <- smooth.basis(  RES$mean  , RES$est , Par ,wtvec=1/RES$se^2 )$fd
   dsdf<-smooth.basis(  RES$mean  , RES$est , Par ,wtvec=1/RES$se^2 )$df  # = # of interor knots + order
   thetahat<-smoothed_LACE$coefs
@@ -74,15 +74,15 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   MMM<- eval.basis(   RES$mean , Bs      )  #function values at the  RES$mean position (mean_exposure observed position)
   #XX<-SSigma%*%MMM
   #SLRthetahat<-solve(  t( XX)%*%XX )%*% t( XX)%*% yy
-  #clear! 关键在于wtvec需要使用平方量�?
-  ###接着估计tau^2�?
+  #clear! 关键在于wtvec需要使用平方量???
+  ###接着估计tau^2???
   #直接用原始的weighted regression - LRT:
   temp<-MMM%*%thetahat# fitted values
   if(random_effect){
     if(Ns==dsdf){
-      tau2<-1   #这里主要是考虑到完全full model的情�?(即，fractional polynomial method)，此时df分母=0 容易报错
+      tau2<-1   #这里主要是考虑到完全full model的情???(即，fractional polynomial method)，此时df分母=0 容易报错
     }else{
-      tau2<-max(1,sum(  (RES$est-temp)^2/RES$se^2     )/(  Ns- dsdf))#没有roughness penalty，那df自然是整�?
+      tau2<-max(1,sum(  (RES$est-temp)^2/RES$se^2     )/(  Ns- dsdf))#没有roughness penalty，那df自然是整???
       }
     cat('Random-effect is considered for smoothing and the actual random effect squared value is: ', tau2,'\n')
   }else{
@@ -103,7 +103,7 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   SmoothRes$var.matrix<-varthetahat
   summary_table<-cbind( as.vector(thetahat),
                         sqrt(as.vector(diag(varthetahat))))  #marginal s.e.s
-  #依据tau2的值来判断使用Z-tes还是t-testt；毕竟tau2==1时，相当于normal variance 不被估计的情�?
+  #依据tau2的值来判断使用Z-tes还是t-testt；毕竟tau2==1时，相当于normal variance 不被估计的情???
   if(tau2==1){
     summary_table<-cbind(summary_table,2*(1-pnorm(  abs(as.vector(thetahat)/sqrt(as.vector(diag(varthetahat))))  )   ) )
   }else{
@@ -117,7 +117,7 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   #dim(MM) #1000 dsdf #df=degree-of-freedom= # of theta parameters
   varM<- MM %*% varthetahat %*%  t(  MM)  #最后一向是random-effect
 
-  pw_std_error<-sqrt( diag(varM) )  #由于是Pointwise, 只取对角线元素即�?
+  pw_std_error<-sqrt( diag(varM) )  #由于是Pointwise, 只取对角线元素即???
   smoothed_LACE_<-eval.fd(    time_obs ,smoothed_LACE )
 
   # plot(time_obs,smoothed_LACE_,type='l')
@@ -169,27 +169,27 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   ###SLR with my code
   # varSLRthetahat<-solve(  t( XX)%*%XX )*tau2
   # varM<- MM %*% varSLRthetahat %*%  t(  MM)
-  # pw_std_error<-sqrt( diag(varM) )  #由于是Pointwise, 只取对角线元素即�?
+  # pw_std_error<-sqrt( diag(varM) )  #由于是Pointwise, 只取对角线元素即???
   # smoothed_LACE_<-eval.fd(    time_obs ,smoothed_LACE )
   # plot(time_obs,smoothed_LACE_,type='l')
   # lines(time_obs , smoothed_LACE_+1.96*pw_std_error, lty=2, lwd=1        )
   # lines( time_obs, smoothed_LACE_-1.96*pw_std_error, lty=2, lwd=1          )
-  # #已经check；确实是一模一�?
+  # #已经check；确实是一模一???
 
   ###For original effect shape
   if(is.na(baseline)){baseline<-RES$mean[1]}
   baseline_used<-time_obs[sum(time_obs<=baseline)]
   cat('The actual basline value used:',baseline_used ,'\n')
 
-
+  #DD: the integration matrix for the basisfunctions with given baseline exposrue level
   DD<-apply( MM, 2, cumsum )*(Rall[2]-Rall[1] )/(1000-1)  #\int_{Rall[1]}^x theta(s)ds where x=time_obs
-  BaseInt<-matrix(rep( DD[sum(time_obs<=baseline),],1000  ), byrow=TRUE,nrow=1000 ) #int_{Rall[1]}^{baseline_used~+} theta(s)ds   #保证baseline_used那一行DD�?0
+  BaseInt<-matrix(rep( DD[sum(time_obs<=baseline),],1000  ), byrow=TRUE,nrow=1000 ) #int_{Rall[1]}^{baseline_used~+} theta(s)ds   #保证baseline_used那一行DD???0
   DD<-DD-BaseInt
 
   hest<-DD%*%thetahat  #h(x) pointwise est
 
-  varD<- DD %*% varthetahat %*%  t(  DD)  #最后一向是random-effect
-  pw_std_error<-sqrt( diag(varD) )  #由于是Pointwise, 只取对角线元素即�?
+  varD<- DD %*% varthetahat %*%  t(  DD)  #最后一项是random-effect
+  pw_std_error<-sqrt( diag(varD) )  #由于是Pointwise, 只取对角线元素即???
 
   # plot(time_obs,hest,type='l', xlab='exposure level'  , ylab='h(x)')
   # lines(time_obs , hest+1.96*pw_std_error, lty=2, lwd=1        )
