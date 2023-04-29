@@ -1,7 +1,7 @@
 # DRMR
 **Doubly-Ranked Stratification in Mendelian Randomization**
 
-Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing homogeneity assumption, conducting nonlinear causal studies, and examining heterogeneous causal effects. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification methods. 
+Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing homogeneity assumption, conducting nonlinear causal studies, and examining heterogeneous effects. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification methods. 
 
 This manuscript will demonstrate the fundamental concepts of DR stratification and provide a simple, step-by-step guide for applying this method. Additionally, a series of subsequent papers will be published to provide further details and insights.[^1].
 [^1]: Different papers would use different writing style for illustration and interpretation. Contact me if you are confused or interested in any aspect of the DR stratification method.
@@ -9,10 +9,9 @@ This manuscript will demonstrate the fundamental concepts of DR stratification a
 
 Make sure to download the DRMR package
 
-
-
 ```R
 devtools::install_github("HDTian/DRMR")
+library(DRMR)
 ```
 
 
@@ -41,6 +40,8 @@ Draw the doubly-ranked stratification (use `?Stratify` to check the parameters f
 rdat<-Stratify(dat) 
 RES<-getSummaryInf( rdat,target=FALSE)
 head(RES$DRres)
+```
+```R
 #          size        min        1q      mean        3q        max       bx       bxse         by       byse        est         se target
 #Stratum 1 1000 -15.555421 -8.660667 -7.427431 -6.035485 -1.3493712 1.066652 0.12171101 -1.4378919 0.17301791 -1.3480425 0.16220656     NA
 #Stratum 2 1000 -10.439764 -6.721907 -5.691190 -4.521686 -0.7632903 1.158202 0.09373183 -1.3370736 0.10698333 -1.1544386 0.09237015     NA
@@ -60,7 +61,7 @@ getSummaryInf( rdat,target=FALSE,onlyDR=TRUE)
 ```
 For residual stratification, it is equivalent to applying the naive stratification wrt the residual variables
 ```R
-dat$M<-dat$X-lm(  dat$X~dat$Z   )$fitted  #obtain the residual variables first
+dat$M<-resid(lm(  dat$X~dat$Z   )) #obtain the residual variables first
 rdat<-Stratify(dat,SoP=nrow(dat),onExposure=FALSE) 
 getSummaryInf( rdat,target=FALSE,onlyDR=TRUE)
 ```
@@ -80,6 +81,9 @@ getSummaryInf( rdat,target=FALSE)
 The coarsened exposure refers to the exposure measured with discrete values that are considered as an approximation for its latent continuous values. Such values could be rounded, binned into categories, or truncated, and all of them should satisfy the rank preserving condition[^444]. The properties of such coarsened exposure enable the use of doubly-ranked stratification, but extra assessment for the degree of coarseness should be done before stratification. One way to do this is by calculating the Gelman-Rubin uniformity values of the rank index in each stratum. You can run the following code to perform this assessment.
 ```R
 getGRstats(rdat)
+
+```
+```R
 #      Stratum     GR_low  GR_up   maxGR  
 #      "Stratum1"  "1"     "1.001" "1.001"
 #      "Stratum2"  "1.001" "1"     "1.001"
@@ -100,12 +104,11 @@ dat$Z<-lm(  dat$X~ dat$G1+ dat$G2 + ...   )$fitted  #G1 G2 ... are genetic varia
 ```
 
 ## Control the randomness and reproducibility
-One feature of the stratification in the DRMR package is that the stratification function will not introduce randomness (in the sense that the same input data will always generate consistent stratification results)[^randomness]. This is beneficial in terms of transparency and reproducibility. However, since ties are broken at random for constant instrument or exposure values, the randomness of such breaks needs to be created before running `Stratify()`. For example, you can add negligible errors to the variable column containing constant values to induce randomness.
+One feature of the stratification in the DRMR package is that the stratification function will not introduce randomness (in the sense that the same input data will always generate the same stratification results)[^randomness]. This is beneficial in terms of transparency and reproducibility. However, since ties are broken at random for constant instrument or exposure values, the randomness of such breaks may be considered in some analysis. You can use the argument `seed` to creat and track the randomness, For example:  
 ```R
-set.seed(1) #track 
-dat$Z<-dat$Z+rnorm(nrow(dat),0,1e-10 )  #when the instrument is discrete-valued
-dat$X<-dat$X+rnorm(nrow(dat),0,1e-10 )  #when the exposure is discrete (eg coarsened)
-Stratify(dat) #then run the DR stratification
+Stratify(dat)
+Stratify(dat,seed=1)
+Stratify(dat,seed=2)
  ```
 [^randomness]: I considered whether to have the function perform break permutation automatically, but I decided against it as it might result in the user losing control over the variation of results caused by the randomness introduced internally (e.g., if they tend not to set a seed). Although these variations often do not affect any conclusions, I removed the randomness from inside the function to ensure transparency and reproducibility.
        
@@ -117,7 +120,7 @@ You may consider transformed exposures or covariates[^trans]. The transformed va
 ## Smoothing
 There are several methods for smoothing the stratification estimation (the stratum-specific estimates are called LACE), including the fractional polynomial method and the piecewise linear method[^smoothing].
 
-To use the fractional polynomial method (e.g. with degree 2), run
+To use the fractional polynomial method (e.g. with degree 2) with the doubly-ranked stratification, run
 ```R
 smooth_res<-Smooth(RES$DRres,Norder=3,baseline=0) #RES is the result returned by getSummaryInf()
 ```
@@ -129,7 +132,7 @@ If you wish to visualize the results, simply run `smooth_res$p ` or `smooth_res$
 
 
 
-To use the piecewise linear method, run:
+To use the piecewise linear method with the doubly-ranked stratification, run:
 ```R
 cutting_values<-(RES$DRres$mean[-1] + head( RES$DRres$mean,-1) )/2
 smooth_res<-Smooth(RES$DRres,Norder=1,baseline=0,Knots=cutting_values)
