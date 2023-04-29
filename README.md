@@ -1,7 +1,7 @@
 # DRMR
 **Doubly-Ranked Stratification in Mendelian Randomization**
 
-Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing homogeneity assumption, conducting nonlinear causal studies, and examining heterogeneous causal effects. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification methods. 
+Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing homogeneity assumption, conducting nonlinear causal studies, and examining heterogeneous effects. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification methods. 
 
 This manuscript will demonstrate the fundamental concepts of DR stratification and provide a simple, step-by-step guide for applying this method. Additionally, a series of subsequent papers will be published to provide further details and insights.[^1].
 [^1]: Different papers would use different writing style for illustration and interpretation. Contact me if you are confused or interested in any aspect of the DR stratification method.
@@ -9,10 +9,9 @@ This manuscript will demonstrate the fundamental concepts of DR stratification a
 
 Make sure to download the DRMR package
 
-
-
 ```R
 devtools::install_github("HDTian/DRMR")
+library(DRMR)
 ```
 
 
