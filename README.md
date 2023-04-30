@@ -12,7 +12,7 @@ You can Install the DRMR package from Github with:
 devtools::install_github("HDTian/DRMR")
 library(DRMR)
 ```
-Alternatively, you can also try the SUMnlmr[^SUMnlmr] package, where the DR method is embedded. 
+Alternatively, you can also try the SUMnlmr[^SUMnlmr] package, where the DR method was embedded. 
 [^SUMnlmr]: https://github.com/amymariemason/SUMnlmr
 
 
