@@ -4,8 +4,9 @@
 
 
 getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified individual dataset
+                        covariate=FALSE, #whether or not adjust covariates?
                         target=TRUE, #if TRUE, will calculate the target causal effect for each stratum
-                        XYmodel='1', #tell me what the true X-Y effect shape is? only applicable when target=TRUE #XYmodel='0' : use self-defined effect shape, in global environment must define:  dif()
+                        XYmodel='1', #tell me what the true X-Y effect shape is? only applicable when target=TRUE
                         bxthre=1e-5, #bx threshold, under this value the bx is regarded as 0 or NA (so no MR ests)
                         getHeterQ=TRUE,  #get the heterogeneity Q statistics?
                         onlyDR=FALSE #only show the DR stratification results?
@@ -14,17 +15,28 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
   #dat check
   if( is.null(rdat$Y) ){stop('No Y detected!: The column of the outcome should be named as Y') }
 
+  #covariates position index
+  cov_pos<-colnames(rdat)%in%paste0( 'C', 1:ncol(rdat) )
+  if(  covariate&(sum(cov_pos)==0)  ){
+    stop('if you wish to adjust the covariates, name the covariates as C1, C2, C3...')
+  }
+
+  if(covariate){
+    cat(  'the covariates to adjuste are:', colnames(rdat)[cov_pos], '\n' )
+  }
+
 
   Ns<-length(  levels(factor(rdat$DRstratum))  )
-  stratify_on_X_or_not<-sum(rdat$M==rdat$X)==nrow(rdat)
+
+  stratify_on_X_or_not<-sum(rdat$M==rdat$X)==nrow(rdat)#judge whether the variable being stratified is the exposure X; TRUE menas yes the stratification is on the exposure
 
 
   RES<-list()
 
 
   if(target&( !stratify_on_X_or_not ) ){
-    stop('The target is not applicable as the stratified variable is not the exposure itself;
-        Try target=FALSE or stratify on the exposure instead')
+    cat('The target effect is still provided but note that the stratified variable is not the exposure but your variable M', '\n',
+        'You may wish to try target=FALSE or stratify on the exposure instead','\n')
   }
 
 
@@ -65,19 +77,27 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
 
 
       if( length(table(selected_dat$Z))==1  ){#如果Z都是单值的，谈何IV analysis?
-        MRfitting<-rbind(MRfitting, c(NA,NA,NA,NA,NA,NA)); Target<-c(Target ,   NA)
+        MRfitting<-rbind(MRfitting, c(NA,NA,NA,NA,NA,NA,NA)); Target<-c(Target ,   NA)
       }else{
         ##naive IVW MR est
-        fitGX<-lm(    selected_dat$X~  selected_dat$Z  );bGX<-summary(fitGX)$coef[-1,1] ;seGX<- summary(fitGX)$coef[-1,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
-        fitGY<-lm(    selected_dat$Y~  selected_dat$Z  );bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
-        if( length(bx)==0  ){#即，bx是numeric(0)；这并没有说明存在null G-X的情况，而是因为Z是单一值的
-          MRfitting<-rbind(MRfitting, c(NA,NA,by,byse,NA,NA))
+        if(!covariate){ #no covariate adjustment
+          fitGX<-lm(    selected_dat$X~  selected_dat$Z  );bGX<-summary(fitGX)$coef[-1,1] ;seGX<- summary(fitGX)$coef[-1,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
+          fitGY<-lm(    selected_dat$Y~  selected_dat$Z  );bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+          Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+        }else{ #with covariate adjustment
+          fitGX<-lm(    selected_dat$X~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] )  );bGX<-summary(fitGX)$coef[2,1] ;seGX<- summary(fitGX)$coef[2,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
+          fitGY<-lm(    selected_dat$Y~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] ) );bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+          Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+        }
+
+        if( length(bx)==0  ){#即，bx是numeric(0)；注意这并没有说明存在null G-X的情况，而是因为Z是单一值的
+          MRfitting<-rbind(MRfitting, c(NA,NA,NA,by,byse,NA,NA))
         }else{
           if(abs(bx)<bxthre ){  #即，bx过小，可能产生inf项目，所以此时直接用NA代替
-            MRfitting<-rbind(MRfitting, c(NA,NA,by,byse,NA,NA))
+            MRfitting<-rbind(MRfitting, c(Fvalue,NA,NA,by,byse,NA,NA))
           }else{
-            MRres<-mr_ivw(mr_input(bx, bxse, by, byse)) #chekced! same as the 2SLS;    易理解，IVW唯一的变数在于random-effect;而single IV的情况random-effect肯定超过1；因为此时SEE=0呀
-            MRfitting<-rbind(MRfitting, c(bx,bxse,by,byse,MRres@Estimate,MRres@StdError))
+            MRres<-mr_ivw(mr_input(bx, bxse, by, byse)) #checked! same as the 2SLS;    易理解，IVW唯一的变数在于random-effect;而single IV的情况random-effect肯定超过1；因为此时SEE=0呀
+            MRfitting<-rbind(MRfitting, c(Fvalue,bx,bxse,by,byse,MRres@Estimate,MRres@StdError))
           }
         }
 
@@ -122,7 +142,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
 
     res<-cbind( Size,Minf, MRfitting , Target)
     res<-as.data.frame(res)
-    colnames(res)<-c('size', 'min','1q','mean', '3q', 'max','bx','bxse','by','byse','est','se','target')
+    colnames(res)<-c('size', 'min','1q','mean', '3q', 'max','Fvalue','bx','bxse','by','byse','est','se','target')
     rownames(res)<-paste0('Stratum ', 1:Ns  )
 
     RES$Rres<-res
@@ -157,19 +177,26 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
     ##M information (min, mean, max)
     Minf<-rbind( Minf, as.numeric(summary(selected_dat$M   ))[c(1,2,4,5,6)]   )
     if( length(table(selected_dat$Z))==1  ){#如果Z都是单值的，谈何IV analysis?
-      MRfitting<-rbind(MRfitting, c(NA,NA,NA,NA,NA,NA)); Target<-c(Target ,   NA)
+      MRfitting<-rbind(MRfitting, c(NA,NA,NA,NA,NA,NA,NA)); Target<-c(Target ,   NA)
     }else{
       ##naive IVW MR est
-      fitGX<-lm(    selected_dat$X~  selected_dat$Z  );bGX<-summary(fitGX)$coef[-1,1] ;seGX<- summary(fitGX)$coef[-1,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
-      fitGY<-lm(    selected_dat$Y~  selected_dat$Z  );bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+      if(!covariate){ #no covariate adjustment
+        fitGX<-lm(    selected_dat$X~  selected_dat$Z  );bGX<-summary(fitGX)$coef[-1,1] ;seGX<- summary(fitGX)$coef[-1,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
+        fitGY<-lm(    selected_dat$Y~  selected_dat$Z  );bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+        Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+      }else{ #with covariate adjustment
+        fitGX<-lm(    selected_dat$X~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] )  );bGX<-summary(fitGX)$coef[2,1] ;seGX<- summary(fitGX)$coef[2,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
+        fitGY<-lm(    selected_dat$Y~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] ) );bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+        Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+      }
       if( length(bx)==0  ){#即，bx是numeric(0)；说明存在null G-X的情况
-        MRfitting<-rbind(MRfitting, c(NA,NA,by,byse,NA,NA))
+        MRfitting<-rbind(MRfitting, c(NA,NA,NA,by,byse,NA,NA))
       }else{
         if(abs(bx)<bxthre ){  #即，bx过小，可能产生inf项目，所以此时直接用NA代替
-          MRfitting<-rbind(MRfitting, c(NA,NA,by,byse,NA,NA))
+          MRfitting<-rbind(MRfitting, c(Fvalue,NA,NA,by,byse,NA,NA))
         }else{
           MRres<-mr_ivw(mr_input(bx, bxse, by, byse))
-          MRfitting<-rbind(MRfitting, c(bx,bxse,by,byse,MRres@Estimate,MRres@StdError))
+          MRfitting<-rbind(MRfitting, c(Fvalue,bx,bxse,by,byse,MRres@Estimate,MRres@StdError))
         }
       }
 
@@ -209,7 +236,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
 
   res<-cbind( Size,Minf, MRfitting , Target)
   res<-as.data.frame(res)
-  colnames(res)<-c( 'size', 'min', '1q','mean','3q','max','bx','bxse','by','byse','est','se','target')
+  colnames(res)<-c( 'size', 'min', '1q','mean','3q','max','Fvalue','bx','bxse','by','byse','est','se','target')
   rownames(res)<-paste0('Stratum ', 1:Ns  )
 
   RES$DRres<-res
