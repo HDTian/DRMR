@@ -5,7 +5,7 @@
 
 getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified individual dataset
                         covariate=FALSE, #whether or not adjust covariates?
-                        target=TRUE, #if TRUE, will calculate the target causal effect for each stratum
+                        target=FALSE, #if TRUE, will calculate the target causal effect for each stratum
                         XYmodel='1', #tell me what the true X-Y effect shape is? only applicable when target=TRUE
                         bxthre=1e-5, #bx threshold, under this value the bx is regarded as 0 or NA (so no MR ests)
                         getHeterQ=TRUE,  #get the heterogeneity Q statistics?
