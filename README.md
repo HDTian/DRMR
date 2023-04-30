@@ -28,7 +28,7 @@ When examining potential non-linear causal effects, one approach is to divide th
 [^DR]: https://www.biorxiv.org/content/10.1101/2022.06.28.497930v1.abstract
 <img alt="DR" src="https://user-images.githubusercontent.com/127906571/229943653-cefbd6ad-fcd5-45a4-95b4-6530b4ea9836.png">
 
-Use the function `getDat()` to create a toy example, where you can experiment with different types of instruments (IVtype), instrument-exposure models (ZXmodel), and exposure-outcome models (XYmodel).
+Use the function `getDat()` to create a toy example, where you can experiment with different types of instruments (`IVtype`), instrument-exposure models (`ZXmodel`), and exposure-outcome models (`XYmodel`).
 ```R
 dat<-getDat( IVtype='cont', ZXmodel='C',XYmodel='2' )
 ```
@@ -102,6 +102,14 @@ The doubly-ranked stratification supports a wide variaty of instrument types, in
 ```R
 dat$Z<-lm(  dat$X~ dat$G1+ dat$G2 + ...   )$fitted  #G1 G2 ... are genetic variants
 ```
+
+## Covariate adjustment
+If you need to adjust for covariates, add them to your data dat with the name `C1`, `C2`, etc. Ensure that the data type is correct as the fitting will follow the rules of the `lm` function[^lm]. To enable covariate adjustment, set the argument `covariate=TRUE`.
+```R
+getSummaryInf( rdat,covariate=TRUE)
+```
+
+[^lm]: All character variables will be treated as factor variables, and corresponding dummy variables will be created to fit in `lm`. If a continuous variable is in character form, it should be transformed into a numerical format before being used in the analysis.
 
 ## Control the randomness and reproducibility
 One feature of the stratification in the DRMR package is that the stratification function will not introduce randomness (in the sense that the same input data will always generate the same stratification results)[^randomness]. This is beneficial in terms of transparency and reproducibility. However, since ties are broken at random for constant instrument or exposure values, the randomness of such breaks may be considered in some analysis. You can use the argument `seed` to creat and track the randomness, For example:  
