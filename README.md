@@ -148,7 +148,7 @@ smooth_res<-Smooth(RES$DRres,Norder=1,baseline=0,Knots=cutting_values)
 [^smoothing]: https://onlinelibrary.wiley.com/doi/full/10.1002/gepi.22041
 
 ## Real application
-Assume you now have the real samples `dat` ready for stratificaton; simply run the code below
+Assume you now have the real samples in a data frame `dat` with correctly named variables (`Z`, `X`, `Y`, etc.), you can simply run the following code:
 ```R       
 rdat<-Stratify(dat)
 RES<-getSummaryInf(rdat,target=FALSE)
