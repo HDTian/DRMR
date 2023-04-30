@@ -9,6 +9,7 @@ Return the summary information of each stratum
 }
 \usage{
 getSummaryInf(rdat,
+              covariate=FALSE,
               target = TRUE,
               XYmodel = "1",
               bxthre = 1e-05,
@@ -19,6 +20,9 @@ getSummaryInf(rdat,
 \arguments{
   \item{rdat}{
 a data containing the stratification information. \code{rdat} is the result of \code{Stratify}.
+}
+\item{covariate}{
+logic value indicates whether or not adjust covariates.
 }
   \item{target}{
 logic value indicates whether or not calculate the target effect values fo each stratum. Target effects can only be known when the true causal effect is known. If you have real data, you may not need this argument.
@@ -37,7 +41,9 @@ logic vlaue indicating whether only get the summary information for the doubly-r
 }
 }
 \details{
-The details of the target effects can be found in Supplementary Text S2. The heterogeneity statistic can be found in Supplementary Text S3.
+The heterogeneity statistic can be found in Supplementary Text S2. The details of the target effects can be found in Supplementary Text S3.
+
+If covariates are to be adjusted, they should be named as \code{C1}, \code{C2}, etc in \code{rdat}.
 }
 \value{
 \code{getSummaryInf} returns a list consisting of the following elements: \code{Rres}, \code{RHeterQ}, \code{DRres}, \code{DRHeterQ}. \code{Rres} and \code{DRres} contain the summry information for each stratum by the residual and doubly-ranked stratification method. \code{RHeterQ} and \code{DRHeterQ} contains the heterogeneity information.
@@ -49,6 +55,7 @@ The summary information for each stratum include (all variables are stratum-spec
 \item{1q}{the 1st quartile exposure (or covariate) value}
 \item{3q}{the 3rd quartile exposure (or covariate) value}
 \item{max}{maximal exposure (or covariate) value}
+\item{Fvalue}{F statistic value of the instrument (ie the instrument strength)}
 \item{bx}{instrument-exposure associations}
 \item{bxse}{standard error of \code{bx}}
 \item{by}{instrument-outcome associations}
