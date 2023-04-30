@@ -10,7 +10,7 @@ Return the summary information of each stratum
 \usage{
 getSummaryInf(rdat,
               covariate=FALSE,
-              target = TRUE,
+              target = FALSE,
               XYmodel = "1",
               bxthre = 1e-05,
               getHeterQ = TRUE,
@@ -25,7 +25,7 @@ a data containing the stratification information. \code{rdat} is the result of \
 logic value indicates whether or not adjust covariates.
 }
   \item{target}{
-logic value indicates whether or not calculate the target effect values fo each stratum. Target effects can only be known when the true causal effect is known. If you have real data, you may not need this argument.
+logic value indicates whether or not calculate the target effect values fo each stratum. Target effects can only be known when the true causal effect is known. If you have real data, you may not need this argument. The default value is \code{target = FALSE}.
 }
   \item{XYmodel}{
 a character indicating the exposure-outcome model on which the target effect is calculated and based. Only applicable when \code{target=TRUE}.
