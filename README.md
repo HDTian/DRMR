@@ -38,7 +38,7 @@ dat<-getDat( IVtype='cont', ZXmodel='C',XYmodel='2' )
 Draw the doubly-ranked stratification (use `?Stratify` to check the parameters for stratification)
 ```R
 rdat<-Stratify(dat) 
-RES<-getSummaryInf( rdat,target=FALSE)
+RES<-getSummaryInf(rdat)
 head(RES$DRres)
 ```
 ```R
@@ -57,13 +57,13 @@ Note that the naive and residual stratification can be regarded as special scena
 For naive stratification, it is equivalent to applying DR with one pre-stratum:
 ```R
 rdat<-Stratify(dat,SoP=nrow(dat)) 
-getSummaryInf( rdat,target=FALSE,onlyDR=TRUE)
+getSummaryInf( rdat,onlyDR=TRUE)
 ```
 For residual stratification, it is equivalent to applying the naive stratification wrt the residual variables
 ```R
 dat$M<-resid(lm(  dat$X~dat$Z   )) #obtain the residual variables first
 rdat<-Stratify(dat,SoP=nrow(dat),onExposure=FALSE) 
-getSummaryInf( rdat,target=FALSE,onlyDR=TRUE)
+getSummaryInf( rdat,onlyDR=TRUE)
 ```
 
 
@@ -72,7 +72,7 @@ If you need to stratify on a covariate (which is common in many heterogeneous ef
 ```R
 dat$M<-covarite_vector  #added the covariate information
 rdat<-Stratify(dat,onExposure=FALSE) 
-getSummaryInf( rdat,target=FALSE)
+getSummaryInf( rdat)
 ```
 
 [^HTE]: https://link.springer.com/article/10.1007/s10654-022-00879-0
@@ -151,7 +151,7 @@ smooth_res<-Smooth(RES$DRres,Norder=1,baseline=0,Knots=cutting_values)
 Assume you now have the real samples in a data frame `dat` with correctly named variables (`Z`, `X`, `Y`, etc.), you can simply run the following code:
 ```R       
 rdat<-Stratify(dat)
-RES<-getSummaryInf(rdat,target=FALSE)
+RES<-getSummaryInf(rdat)
 smooth_res<-Smooth(RES$DRres,Norder=3,baseline=0)
 ```      
 then you can use the information in `RES` and `smooth_res` to build the results you desire[^further].
