@@ -17,8 +17,8 @@ library(xtable)
 
 
 
-devtools::install_github("HDTian/DRMR")
-library(DRMR)
+#devtools::install_github("HDTian/DRMR")
+#library(DRMR)
 
 #path<-'...' #define your desired path
 
