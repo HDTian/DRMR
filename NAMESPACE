@@ -3,7 +3,7 @@ export(getDat)
 export(getDatU)
 export(getGRstats)
 export(getSummaryInf)
-export(Smooth )
+export(Smooth)
 export(Stratify)
 
 importFrom(dplyr,arrange)
