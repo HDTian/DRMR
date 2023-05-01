@@ -1,5 +1,10 @@
 #DRMR not built with roxygen2
-
+export(getDat)
+export(getDatU)
+export(getGRstats)
+export(getSummaryInf)
+export(Smooth )
+export(Stratify)
 
 importFrom(dplyr,arrange)
 import(fda)
