@@ -52,7 +52,7 @@ head(RES$DRres)
 ```
 The function `Stratify()` will return the individual stratification index. The function `getSummaryInf()` will provide summary information based on the stratified result.
 
-Note that the naive and residual stratification can be regarded as special scenarios of the DR stratification. Hence, you may prefer to use only the DR method..
+Note that the naive and residual stratification can be regarded as special scenarios of the DR stratification. Hence, you may prefer to use only the DR method.
 
 For naive stratification, it is equivalent to applying DR with one pre-stratum:
 ```R
@@ -148,13 +148,37 @@ smooth_res<-Smooth(RES$DRres,Norder=1,baseline=0,Knots=cutting_values)
 [^smoothing]: https://onlinelibrary.wiley.com/doi/full/10.1002/gepi.22041
 
 ## Real application
-Assume you now have the real samples in a data frame `dat` with correctly named variables (`Z`, `X`, `Y`, etc.), you can simply run the following code:
+The DRMR package follows a one-argument style, which means that in principle all you need to provide is a one-sample data frame. Before using the package, ensure that the input data is in the form of a dataframe:
+```R
+is.data.frame(your_prepared_dat)
+dat<-as.data.frame(your_prepared_dat)
+```
+The DRMR package does not require you to specify instruments, exposures, or outcomes as arguments. The functions will automatically draw stratification and perform related analysis based on the column names of the inputted dataframe. It is important to ensure that the column names match the required naming conventions for the function to work properly.:
+- The instrument: `Z` (see the 'Different types of instrument' section if your instrument is complex)
+- The exposure: `X`
+- The outcome: `Y`
+- (if applicable) the covariate to stratify: `M`
+- (if applicable) the covariate to adjust: `C1`, `C2`, `C3`, ...
+
+Check the names of your data frame
+```R
+colnames(dat)
+```
+
+Always be careful about the value type (e.g. for each variable do you need numeric values or character values?)
+```R
+apply(dat, 2, is.numeric)
+apply(dat, 2, is.character)
+```
+Then clean your data (e.g. values modification, values rescale, imputation, removing missing data, etc)
+
+Assume you now have the samples in a data frame `dat` with correctly named variables (`Z`, `X`, `Y`, etc.), you can simply run the following code:
 ```R       
 rdat<-Stratify(dat)
 RES<-getSummaryInf(rdat)
 smooth_res<-Smooth(RES$DRres,Norder=3,baseline=0)
 ```      
-then you can use the information in `RES` and `smooth_res` to build the results you desire[^further].
+then you can use the information in `RES` and `smooth_res` (try `?Stratify`, `?getSummaryInf` and `?Smooth` to check the details) to build the results you desire[^further].
 
 [^further]: Feel free to contact me if you have any further questions or need additional information that the current function cannot provide. I would be happy to discuss your study further and provide any assistance you may need.
 
