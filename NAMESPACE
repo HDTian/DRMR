@@ -1,1 +1,8 @@
-exportPattern("^[[:alpha:]]+")
+#DRMR not built with roxygen2
+
+
+importFrom(dplyr,arrange)
+import(fda)
+import(fda.usc)
+import(ggplot2)
+import(MendelianRandomization)
