@@ -22,7 +22,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
   }
 
   if(covariate){
-    cat(  'the covariates to adjuste are:', colnames(rdat)[cov_pos], '\n' )
+    cat(  'the covariates to adjuste are:', colnames(rdat)[cov_pos], '(empty means no covariate to adjust)' , '\n' )
   }
 
 
