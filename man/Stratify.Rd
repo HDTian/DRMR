@@ -19,10 +19,10 @@ a dataset to be stratified.
 Logic value to determine whether stratification is done on exposure or not. If \code{onExposure=FALSE}, the covariate rather than the exposure will be stratified on. Default value is \code{onExposure==TRUE}.
 }
   \item{Ns}{
-a value indicates the number of stratum to be built.
+a value indicates the number of strata to be built.
 }
   \item{SoP}{
-a value indicates the size of pre-stratum. Default size of pre-stratum is equal to the number stratum.
+a value indicates the size of pre-strata. Default size of pre-stratum is equal to the number of strata.
 }
  \item{seed}{
 a value of seed for reproducibility. Default value is \code{seed=NA}.
