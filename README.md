@@ -105,6 +105,13 @@ The doubly-ranked stratification supports a wide variaty of instrument types, in
 dat$Z<-lm(  dat$X~ dat$G1+ dat$G2 + ...   )$fitted  #G1 G2 ... are genetic variants
 ```
 
+## Other outcome types
+If you outcome is not or cannot transoformed to a continous outcome with simple linear model, you may need use other models[^outcometype]. For exmaple, if you outcome is a binary, you can adjust the fitting model using the argument `family_used`
+```R
+getSummaryInf( rdat,family_used='binomial')
+```
+[^outcometype]: Some outcome types are tricky, contact me to discuss the most appropriate model
+
 ## Covariate adjustment
 If you need to adjust for covariates, add them to your data `dat` or `rdat` with the name `C1`, `C2`, etc. Ensure that the data type is correct as the fitting will follow the rules of the `lm` function[^lm]. To enable covariate adjustment, set the argument `covariate=TRUE`.
 ```R
