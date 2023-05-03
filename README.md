@@ -10,6 +10,8 @@ This manuscript will demonstrate the fundamental concepts of DR stratification a
 You can Install the DRMR package from Github with:
 ```R
 devtools::install_github("HDTian/DRMR")
+```
+```R
 library(DRMR)
 ```
 Alternatively, you can also try the SUMnlmr[^SUMnlmr] package, where the DR method was embedded. 
