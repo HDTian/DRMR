@@ -4,6 +4,7 @@
 
 
 getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified individual dataset
+                        family_used='gaussian', #outcome type currently only support to exponential family
                         covariate=FALSE, #whether or not adjust covariates?
                         target=FALSE, #if TRUE, will calculate the target causal effect for each stratum
                         XYmodel='1', #tell me what the true X-Y effect shape is? only applicable when target=TRUE
@@ -15,7 +16,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
   #dat check
   if( is.null(rdat$Y) ){stop('No Y detected!: The column of the outcome should be named as Y') }
 
-  if( length(table(rdat$Y))==2  ){stop('4/May/2023: Currently DRMR does not support binary outcome; will be updated soon')}
+
 
   #covariates position index
   cov_pos<-colnames(rdat)%in%paste0( 'C', 1:ncol(rdat) )
@@ -84,11 +85,13 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
         ##naive IVW MR est
         if(!covariate){ #no covariate adjustment
           fitGX<-lm(    selected_dat$X~  selected_dat$Z  );bGX<-summary(fitGX)$coef[-1,1] ;seGX<- summary(fitGX)$coef[-1,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
-          fitGY<-lm(    selected_dat$Y~  selected_dat$Z  );bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+          fitGY<-glm(    selected_dat$Y~  selected_dat$Z ,family =family_used   )
+          bGY<-summary(fitGY)$coef[-1,1];seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
           Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
         }else{ #with covariate adjustment
           fitGX<-lm(    selected_dat$X~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] )  );bGX<-summary(fitGX)$coef[2,1] ;seGX<- summary(fitGX)$coef[2,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
-          fitGY<-lm(    selected_dat$Y~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] ) );bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+          fitGY<-glm(    selected_dat$Y~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] ),family =family_used  )
+          bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
           Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
         }
 
@@ -184,11 +187,13 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
       ##naive IVW MR est
       if(!covariate){ #no covariate adjustment
         fitGX<-lm(    selected_dat$X~  selected_dat$Z  );bGX<-summary(fitGX)$coef[-1,1] ;seGX<- summary(fitGX)$coef[-1,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
-        fitGY<-lm(    selected_dat$Y~  selected_dat$Z  );bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+        fitGY<-glm(    selected_dat$Y~  selected_dat$Z  ,family =family_used )
+        bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
         Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
       }else{ #with covariate adjustment
         fitGX<-lm(    selected_dat$X~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] )  );bGX<-summary(fitGX)$coef[2,1] ;seGX<- summary(fitGX)$coef[2,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
-        fitGY<-lm(    selected_dat$Y~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] ) );bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+        fitGY<-glm(    selected_dat$Y~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] ) ,family =family_used  )
+        bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
         Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
       }
       if( length(bx)==0  ){#即，bx是numeric(0)；说明存在null G-X的情况
