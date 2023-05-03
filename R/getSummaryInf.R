@@ -15,6 +15,8 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
   #dat check
   if( is.null(rdat$Y) ){stop('No Y detected!: The column of the outcome should be named as Y') }
 
+  if( length(table(rdat$Y))==2  ){stop('4/May/2023: Currently DRMR does not support binary outcome; will be updated soon')}
+
   #covariates position index
   cov_pos<-colnames(rdat)%in%paste0( 'C', 1:ncol(rdat) )
   if(  covariate&(sum(cov_pos)==0)  ){
