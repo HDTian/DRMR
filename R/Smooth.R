@@ -1,11 +1,5 @@
 
-#My smoothing for LACEs
 
-#Concepts: internal knots; order ; Roughness penalty; random-effect setting
-
-
-#For piecewise: internal knots use stratum min/max boundary + Noder = 1
-#For polynomial: higher order (=1, 2, ...) and not use knots
 
 
 Smooth<-function( res,#RES$DRres #the result summary information table RES<-getSummaryInf(rdat)
