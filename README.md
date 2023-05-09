@@ -134,9 +134,9 @@ Stratify(dat,seed=2)
 ## Variable transformation
 You may consider transformed exposures or covariates[^trans]. The transformed variable could be helpful in terms of interpretation. If you use a bijective transformation, the DR stratification will not be changed. You can simply transform you variable wrt `dat` by using `dat$X<-f(dat$X)` where `f()` is your transformation function`   
 [^trans]: One example is the log-transformation: https://www.medrxiv.org/content/10.1101/2022.10.26.22280570v2 
-## Smoothing[^smoothing]
+## Smoothing[^smooth]
 There are several methods for smoothing the stratification estimation (the stratum-specific estimates are called LACE), including the fractional polynomial method and the piecewise linear method[^smoothing].
-[^smoothing]: The necessity of smoothing depends on the purpose of your study; if you are doing counterfactual prediction, smoothing is well worth trying; if you are doing inference, smoothing is usually not necessary.
+[^smooth]: The necessity of smoothing depends on the purpose of your study; if you are doing counterfactual prediction, smoothing is well worth trying; if you are doing inference, smoothing is usually not necessary.
 
 To use the fractional polynomial method (e.g. with degree 2) with the doubly-ranked stratification, run
 ```R
