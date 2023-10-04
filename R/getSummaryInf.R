@@ -224,7 +224,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
         smoothed_fd <- smooth.basis(  time_obs-RRR[1]  , Aobs  , Par  )$fd
         smoothed_At<-eval.fd(smoothed_fd, seq(0,RRR[2]-RRR[1] , len=1000 )   )
         #最终就是获得At这条曲线在time_obs点上的值，方便积分而已
-        #其实使用FDA没有太大必要，
+        #其实使用FDA没有太大必要，直接在At上取多个点就好
 
         hdx<-nonlinear_dif( time_obs      ) #h'(x)在time_obs上的值
         times<-smoothed_At*hdx  #At*hdx 在time_obs上的值
