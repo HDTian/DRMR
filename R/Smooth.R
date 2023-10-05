@@ -92,7 +92,7 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
 
   ###WLR with fda code
   y2cMap<- smooth.basis(  RES$mean  , RES$est , Par ,wtvec=1/RES$se^2 )$y2cMap
-  varthetahat<-y2cMap %*% diag(  RES$se^2 )  %*% t(y2cMap  )* tau2
+  varthetahat<-y2cMap %*% diag(  RES$se^2 )  %*% t(y2cMap  )* tau2  #经典WLR的系数估计量的方差
 
   SmoothRes$var.matrix<-varthetahat
   summary_table<-cbind( as.vector(thetahat),
@@ -136,7 +136,7 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
       geom_hline( yintercept=0, color='grey',linetype='dashed')+
       labs(x='Exposure level',y='LACE estimates',subtitle =paste0("Stratification non-linearity p-value: ",HeterQ[3]) )+
       theme_bw()+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
-      coord_cartesian(ylim = c( min(res$est-1.96*res$se)-0.5,max(res$est+1.96*res$se)+0.5) )
+      coord_cartesian(ylim = c( min(res$est-1.96*res$se)-max(res$se),max(res$est+1.96*res$se)+max(res$se)) ) #0.5这个距离有时候会很大
   }else{
     p<-ggplot(ggdata, aes(tps, est))+
       geom_point(data=ggdata,mapping=aes(x=tps,y=est),color='black',alpha=1)+
@@ -147,7 +147,7 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
       geom_hline( yintercept=0, color='grey',linetype='dashed')+
       labs(x='Exposure level',y='LACE estimates' )+
       theme_bw()+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
-      coord_cartesian(ylim = c( min(res$est-1.96*res$se)-0.5,max(res$est+1.96*res$se)+0.5) )
+      coord_cartesian(ylim = c( min(res$est-1.96*res$se)-max(res$se),max(res$est+1.96*res$se)+max(res$se)) )
   }
 
   if(Plot){print(p)}
@@ -204,7 +204,7 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
     geom_vline( xintercept=baseline_used, color='grey',linetype='dashed')+
     labs(x='Exposure level',y='Effect')+
     theme_bw()+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
-    coord_cartesian(ylim = c( min(hest)-1,max(hest)+1) )
+    coord_cartesian(ylim = c( min(hest)-max(pw_std_error),max(hest)+max(pw_std_error)) )  #1 或者0.5这些距离都太大了
   if(Plot){print(hp)}
   SmoothRes$hp<-hp
 
