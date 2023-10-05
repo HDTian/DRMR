@@ -4,7 +4,7 @@
 
 
 getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified individual dataset
-                        family_used='gaussian', #outcome type currently only support to exponential family
+                        family_used='gaussian', #outcome type currently support to exponential family or 'coxph'
                         covariate=FALSE, #whether or not adjust covariates?
                         target=FALSE, #if TRUE, will calculate the target causal effect for each stratum
                         XYmodel='1', #tell me what the true X-Y effect shape is? only applicable when target=TRUE
@@ -85,14 +85,27 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
         ##naive IVW MR est
         if(!covariate){ #no covariate adjustment
           fitGX<-lm(    selected_dat$X~  selected_dat$Z  );bGX<-summary(fitGX)$coef[-1,1] ;seGX<- summary(fitGX)$coef[-1,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
-          fitGY<-glm(    selected_dat$Y~  selected_dat$Z ,family =family_used   )
-          bGY<-summary(fitGY)$coef[-1,1];seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
           Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+          if(family_used!='coxph'   ){
+            fitGY<-glm(    selected_dat$Y~  selected_dat$Z ,family =family_used   )
+            bGY<-summary(fitGY)$coef[-1,1];seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+          }
+          if(family_used=='coxph'){
+            GYfit <- coxph( selected_dat$Y~  selected_dat$Z ) #y: must be the Surv objective
+            by<-as.numeric( summary(fitGY)$coef[1,1]    );byse<-as.numeric(   summary(fitGY)$coef[1,3]   )
+          }
+
         }else{ #with covariate adjustment
           fitGX<-lm(    selected_dat$X~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] )  );bGX<-summary(fitGX)$coef[2,1] ;seGX<- summary(fitGX)$coef[2,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
+          Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+          if(family_used!='coxph'){
           fitGY<-glm(    selected_dat$Y~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] ),family =family_used  )
           bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
-          Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+          }
+          if(family_used=='coxph'){
+            GYfit <- coxph( selected_dat$Y~  selected_dat$Z +as.matrix( selected_dat[,cov_pos] ) ) #y: must be the Surv objective
+            by<-as.numeric( summary(fitGY)$coef[1,1]    );byse<-as.numeric(   summary(fitGY)$coef[1,3]   )
+          }
         }
 
         if( length(bx)==0  ){#即，bx是numeric(0)；注意这并没有说明存在null G-X的情况，而是因为Z是单一值的
@@ -187,14 +200,26 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
       ##naive IVW MR est
       if(!covariate){ #no covariate adjustment
         fitGX<-lm(    selected_dat$X~  selected_dat$Z  );bGX<-summary(fitGX)$coef[-1,1] ;seGX<- summary(fitGX)$coef[-1,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
+        Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+        if(family_used!='coxph'){
         fitGY<-glm(    selected_dat$Y~  selected_dat$Z  ,family =family_used )
         bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
-        Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+        }
+        if(family_used=='coxph'){
+          GYfit <- coxph( selected_dat$Y~  selected_dat$Z  ) #y: must be the Surv objective
+          by<-as.numeric( summary(fitGY)$coef[1,1]    );byse<-as.numeric(   summary(fitGY)$coef[1,3]   )
+        }
       }else{ #with covariate adjustment
         fitGX<-lm(    selected_dat$X~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] )  );bGX<-summary(fitGX)$coef[2,1] ;seGX<- summary(fitGX)$coef[2,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
-        fitGY<-glm(    selected_dat$Y~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] ) ,family =family_used  )
-        bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
         Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
+        if(family_used!='coxph'){
+         fitGY<-glm(    selected_dat$Y~  selected_dat$Z + as.matrix( selected_dat[,cov_pos] ) ,family =family_used  )
+         bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+        }
+        if(family_used=='coxph'){
+          GYfit <- coxph( selected_dat$Y~  selected_dat$Z +as.matrix( selected_dat[,cov_pos] ) ) #y: must be the Surv objective
+          by<-as.numeric( summary(fitGY)$coef[1,1]    );byse<-as.numeric(   summary(fitGY)$coef[1,3]   )
+        }
       }
       if( length(bx)==0  ){#即，bx是numeric(0)；说明存在null G-X的情况
         MRfitting<-rbind(MRfitting, c(NA,NA,NA,by,byse,NA,NA))
