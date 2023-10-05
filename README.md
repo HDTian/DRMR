@@ -138,7 +138,7 @@ You may consider transformed exposures or covariates[^trans]. The transformed va
 There are several methods for smoothing the stratification estimation (the stratum-specific estimates are called LACE), including the fractional polynomial method and the piecewise linear method[^smoothing].
 [^smooth]: The necessity of smoothing depends on the purpose of your study; if you are doing counterfactual prediction, smoothing is well worth trying; if you are doing inference, smoothing is usually not necessary.
 
-To use the fractional polynomial method (e.g. with degree 2) with the doubly-ranked stratification, run
+To use the fractional polynomial method (e.g. of degree 2 with first and second order) with the doubly-ranked stratification, run
 ```R
 smooth_res<-Smooth(RES$DRres,Norder=3,baseline=0) #RES is the result returned by getSummaryInf()
 ```
