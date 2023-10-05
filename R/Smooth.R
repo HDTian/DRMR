@@ -1,6 +1,6 @@
 
 
-
+#naive smooth
 
 Smooth<-function( res,#RES$DRres #the result summary information table RES<-getSummaryInf(rdat)
                   Rall=NA, #A vector: Exposure range for smoothing and visualization
