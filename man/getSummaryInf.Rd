@@ -23,7 +23,7 @@ getSummaryInf(rdat,
 a data containing the stratification information. \code{rdat} is the result of \code{Stratify}.
 }
 \item{family_used}{
-a character indicates the type of the outcome. Currently only support the exponential family that can be recognized by \code{glm} (e.g. \code{'gaussian'}, \code{'binomial'}, \code{'poisson'} etc). The default value is \code{family_used='gaussian'} (used for continous outcome).
+a character indicates the type of the outcome. Currently support the exponential family that can be recognized by \code{glm} (e.g. \code{'gaussian'}, \code{'binomial'}, \code{'poisson'} etc) and the Cox PH model in survival analysis (\code{'coxph'}). The default value is \code{family_used='gaussian'} (used for continous outcome). Note for \code{family_used='coxph'} the outcome must be \code{Surv} objective (i.e. \code{Surv(time, time2, event)}).
 }
 \item{covariate}{
 logic value indicates whether or not adjust covariates.
