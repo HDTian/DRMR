@@ -91,7 +91,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
             bGY<-summary(fitGY)$coef[-1,1];seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
           }
           if(family_used=='coxph'){
-            GYfit <- coxph( selected_dat$Y~  selected_dat$Z ) #y: must be the Surv objective
+            fitGY <- coxph( selected_dat$Y~  selected_dat$Z ) #y: must be the Surv objective
             by<-as.numeric( summary(fitGY)$coef[1,1]    );byse<-as.numeric(   summary(fitGY)$coef[1,3]   )
           }
 
@@ -103,7 +103,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
           bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
           }
           if(family_used=='coxph'){
-            GYfit <- coxph( selected_dat$Y~  selected_dat$Z +as.matrix( selected_dat[,cov_pos] ) ) #y: must be the Surv objective
+            fitGY <- coxph( selected_dat$Y~  selected_dat$Z +as.matrix( selected_dat[,cov_pos] ) ) #y: must be the Surv objective
             by<-as.numeric( summary(fitGY)$coef[1,1]    );byse<-as.numeric(   summary(fitGY)$coef[1,3]   )
           }
         }
@@ -202,11 +202,11 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
         fitGX<-lm(    selected_dat$X~  selected_dat$Z  );bGX<-summary(fitGX)$coef[-1,1] ;seGX<- summary(fitGX)$coef[-1,2] ; bx<-as.numeric( bGX  ); bxse<-as.numeric(  seGX)
         Fvalue<- summary(fitGX)$coef[2,3]^2    #IV strength - F value
         if(family_used!='coxph'){
-        fitGY<-glm(    selected_dat$Y~  selected_dat$Z  ,family =family_used )
-        bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
+         fitGY<-glm(    selected_dat$Y~  selected_dat$Z  ,family =family_used )
+         bGY<-summary(fitGY)$coef[-1,1] ;seGY<-summary(fitGY)$coef[-1,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
         }
         if(family_used=='coxph'){
-          GYfit <- coxph( selected_dat$Y~  selected_dat$Z  ) #y: must be the Surv objective
+          fitGY <- coxph( selected_dat$Y~  selected_dat$Z  ) #y: must be the Surv objective
           by<-as.numeric( summary(fitGY)$coef[1,1]    );byse<-as.numeric(   summary(fitGY)$coef[1,3]   )
         }
       }else{ #with covariate adjustment
@@ -217,7 +217,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
          bGY<-summary(fitGY)$coef[2,1] ;seGY<-summary(fitGY)$coef[2,2] ; by<-as.numeric( bGY  ); byse<-as.numeric(  seGY)
         }
         if(family_used=='coxph'){
-          GYfit <- coxph( selected_dat$Y~  selected_dat$Z +as.matrix( selected_dat[,cov_pos] ) ) #y: must be the Surv objective
+          fitGY <- coxph( selected_dat$Y~  selected_dat$Z +as.matrix( selected_dat[,cov_pos] ) ) #y: must be the Surv objective
           by<-as.numeric( summary(fitGY)$coef[1,1]    );byse<-as.numeric(   summary(fitGY)$coef[1,3]   )
         }
       }
