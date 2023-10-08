@@ -6,8 +6,8 @@
 getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified individual dataset
                         family_used='gaussian', #outcome type currently support to exponential family or 'coxph'
                         covariate=FALSE, #whether or not adjust covariates?
-                        target=FALSE, #if TRUE, will calculate the target causal effect for each stratum
-                        XYmodel='1', #tell me what the true X-Y effect shape is? only applicable when target=TRUE
+                        target=FALSE, #if TRUE, will calculate the target causal effect for each stratum and generate the weight plot
+                        XYmodel='1', #tell me what the true X-Y effect shape is? only applicable when target=TRUE #XYmodel='1' no causal effect
                         bxthre=1e-5, #bx threshold, under this value the bx is regarded as 0 or NA (so no MR ests)
                         getHeterQ=TRUE,  #get the heterogeneity Q statistics?
                         onlyDR=FALSE #only show the DR stratification results?
@@ -60,7 +60,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
   if( is.null(rdat$X_) ){ rdat$X_<-rdat$X  } #Target effect is the expected stratum-specific effect without any error (either confounding or coarsened error)
 
 
-
+  Time_obs<- seq( min( rdat$X_  ), max( rdat$X_  ), len=1000 )#全局的exposure points
 
 
   if(!onlyDR){
@@ -130,6 +130,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
           }
           RRR<-c(min(selected_dat$X_  ),   max( selected_dat$X_    ) )  #RRR range for FDA
           time_obs<- seq( RRR[1],RRR[2], len=1000 )#length越大越精准
+
           At_<-function(t){sapply(t, function(t){ At(t)} ) } #At函数可积化
           Aobs<- At_(   time_obs )
           #B-spline smoothing
@@ -138,7 +139,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
           smoothed_fd <- smooth.basis(  time_obs-RRR[1]  , Aobs  , Par  )$fd
           smoothed_At<-eval.fd(smoothed_fd, seq(0,RRR[2]-RRR[1] , len=1000 )   )
           #最终就是获得At这条曲线在time_obs点上的值，方便积分而已
-          #其实使用FDA没有太大必要，
+          #其实使用FDA没有太大必要，smooth前后几乎一样
 
           hdx<-nonlinear_dif( time_obs      ) #h'(x)在time_obs上的值
           times<-smoothed_At*hdx  #At*hdx 在time_obs上的值
@@ -149,6 +150,11 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
           fitGX_<-lm(    selected_dat$X_~  selected_dat$Z  );bx_<-as.numeric(summary(fitGX_)$coef[-1,1])
           targetvalue<-intres/bx_  #target effect  (除以bx是因为之前的At分母并不是cov(Z,X)) #bx_是依据X_算的；即，可能coarsened
           Target<-c(Target ,   targetvalue)
+
+          #store the weighting function information - used for SoF fitting
+          RES$Rweightfun$exposure_points<-rbind( RES$Rweightfun$exposure_points , Time_obs  )
+          RES$Rweightfun$weight_values<-rbind( RES$Rweightfun$weight_values , as.vector( At_(   Time_obs )/bx_)  )  #/bx_ 对最后的SoF结果不会有任何影响（因为MLE直接抵消了）
+          #看bias只需要shape的偏度就行；是否/bx_自然不影响
         }else{Target<-c(Target ,   NA)}
 
       }
@@ -157,6 +163,17 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
 
 
     }
+
+    if(target){
+      #weight function plot
+      ggdata<-data.frame(    exposure_points= as.vector(   t(RES$Rweightfun$exposure_points)   )   ,
+                             weightvalues= as.vector(   t(RES$Rweightfun$weight_values)   ),
+                             type=rep( paste0('Stratum ', 1:Ns),each=1000 ) )
+      Rp<-ggplot(ggdata, aes(exposure_points, weightvalues, colour = type)) +geom_line()
+      RES$Rp<-Rp
+    }
+
+
 
     res<-cbind( Size,Minf, MRfitting , Target)
     res<-as.data.frame(res)
@@ -260,10 +277,24 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
         fitGX_<-lm(    selected_dat$X_~  selected_dat$Z  );bx_<-as.numeric(summary(fitGX_)$coef[-1,1])
         targetvalue<-intres/bx_  #target effect  (除以bx是因为之前的At分母并不是cov(Z,X)) #bx_是依据X_算的；即，可能coarsened
         Target<-c(Target ,   targetvalue)
+
+        #store the weighting function information - used for SoF fitting
+        RES$DRweightfun$exposure_points<-rbind( RES$DRweightfun$exposure_points , Time_obs  )
+        RES$DRweightfun$weight_values<-rbind( RES$DRweightfun$weight_values , as.vector(At_(   Time_obs )/bx_)  )  #/bx_ 对最后的SoF结果不会有任何影响（因为MLE直接抵消了）
+        #看bias只需要shape的偏度就行；是否/bx_自然不影响
       }else{Target<-c(Target ,   NA)}
     }
 
 
+  }
+
+  if(target){
+    #weight function plot
+    ggdata<-data.frame(    exposure_points= as.vector(   t(RES$DRweightfun$exposure_points)   )   ,
+                           weightvalues= as.vector(   t(RES$DRweightfun$weight_values)   ),
+                           type=rep( paste0('Stratum ', 1:Ns),each=1000 ) )
+    DRp<-ggplot(ggdata, aes(exposure_points, weightvalues, colour = type)) +geom_line()
+    RES$DRp<-DRp
   }
 
   res<-cbind( Size,Minf, MRfitting , Target)
@@ -291,6 +322,9 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
   return(RES)
 }
 
+#return:
+#  $Rres  $DRres  $RES$Rweightfun $RES$DRweightfun  $Rp $DRp   $RHeterQ  $DRHeterQ
+
 #Warning message:
 #  In summary.lm(fitGX) : essentially perfect fit: summary may be unreliable
 #Z肯定是多值的(否则不会跑到这一条代码)，这其实代表着X是一个值(往往是coarsened导致的)；此时bx为0，
@@ -305,4 +339,24 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
 # dat<-getDat( IVtype='cont', ZXmodel='C',XYmodel='1' ) #get a toy data
 # rdat<-Stratify(dat)  #Do stratification on the data
 # RES<-getSummaryInf( rdat, target=TRUE, bxthre=1e-5, XYmodel='1',getHeterQ=TRUE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
