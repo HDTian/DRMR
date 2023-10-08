@@ -2,14 +2,14 @@
 
 #naive smooth
 
-Smooth<-function( res,#RES$DRres #the result summary information table RES<-getSummaryInf(rdat)
+Smooth<-function( res,#RES$DRres #the result summary information table RES<-getSummaryInf(rdat) #need bx bxse by byse mean est se
                   Rall=NA, #A vector: Exposure range for smoothing and visualization
                   baseline=NA, #the baseline exposure value for orginal causal effect shape
                   Norder=1,
                   Knots=NA, #internal knots;  c(1,2,3) or '3' (character)
                   Lambda=0,  #tuning parameter for roughness; lambda=0 means no roughness penalty
                   random_effect=TRUE,
-                  getHeterQ=TRUE, #if to show the Q p-value for the differentiate function plot?
+                  getHeterQ=TRUE, #if to show the Q and trend test p-value for the differentiate function plot?
                   Plot=FALSE  #logic; Plot=TRUE will automatically print the two ggplots
 ){
   if(getHeterQ){
@@ -24,6 +24,11 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
     pvalue<-1-pchisq(QQ, Qdf ) #不会考虑NA的stratum
     HeterQ<-c(QQ, Qdf, round(pvalue,3)  )#; names(HeterQ)<-c('Q statistic' ,'df' ,'p-value'  )
     #RES$RHeterQ<-HeterQ
+
+    ###meta regression trend test (using x and x^2 up to second order)
+    metadat<-data.frame(  est=res$est , se=res$se, mean=res$mean     )
+    metares<-rma(yi=est, sei=se, mods =cbind(mean , mean^2 ), data = metadat)
+    TrendValues<-c( metares$QM , metares$QMdf[1] , metares$QMp    )
   }
 
   SmoothRes<-list()
@@ -67,10 +72,10 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   #yy<-SSigma%*%RES$est
   MMM<- eval.basis(   RES$mean , Bs      )  #function values at the  RES$mean position (mean_exposure observed position)
   #XX<-SSigma%*%MMM
-  #SLRthetahat<-solve(  t( XX)%*%XX )%*% t( XX)%*% yy
-  #clear! 关键在于wtvec需要使用平方量???
+  #SLRthetahat<-solve(  t( XX)%*%XX )%*% t( XX)%*% yy  #Simple linear regression
+  #clear! 关键在于wtvec需要使用平方量  #checked! 没毛病
   ###接着估计tau^2???
-  #直接用原始的weighted regression - LRT:
+  #直接用原始的weighted regression - LRT:  当然用SLR也行： yy<-SSigma%*%RES$est # XX<-SSigma%*%MMM
   temp<-MMM%*%thetahat# fitted values
   if(random_effect){
     if(Ns==dsdf){
@@ -82,6 +87,13 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   }else{
     tau2<-1
   }
+
+  #AIC
+  ###STEP5: also return the AIC (for model selection purpose)
+  Sigma<-diag(    RES$se^2  )
+  SSSigma<-Sigma*tau2  #times tau for random-effect setting
+  AIC<- 2*log(  det(  SSSigma )      ) + t(RES$est-MMM%*%thetahat)%*%solve(SSSigma)%*%(RES$est-MMM%*%thetahat) + 2*dsdf
+  SmoothRes$AIC<-AIC
 
   #or: use Simple Linear Regression
   #tau2<-max(1,sum( (yy-XX%*%SLRthetahat )^2 )/(Ns -dsdf))#checked 确实是一样的
@@ -134,7 +146,10 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
       geom_line(data=ggsmooth,mapping=aes(x=time_obs,y=smooth_low),color='black',alpha=1,linetype='dashed')+
       geom_line(data=ggsmooth,mapping=aes(x=time_obs,y=smooth_up),color='black',alpha=1,linetype='dashed')+
       geom_hline( yintercept=0, color='grey',linetype='dashed')+
-      labs(x='Exposure level',y='LACE estimates',subtitle =paste0("Stratification non-linearity p-value: ",HeterQ[3]) )+
+      labs(x='Exposure level',y='LACE estimates',
+           subtitle =paste0("Q value/df/p-value: ",round(HeterQ[1],3),'/',HeterQ[2],'/',HeterQ[3],
+                            '\n','Trend test value/df/p-value: ', round(TrendValues[1],3), '/',TrendValues[2],'/',round(TrendValues[3],6),
+                            '\n','specific order term pvalues: ', round(metares$pval[2],3), ',', round(metares$pval[3],3)  ) )+
       theme_bw()+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
       coord_cartesian(ylim = c( min(res$est-1.96*res$se)-max(res$se),max(res$est+1.96*res$se)+max(res$se)) ) #0.5这个距离有时候会很大
   }else{
