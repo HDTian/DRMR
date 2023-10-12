@@ -2,16 +2,28 @@
 
 #naive smooth
 
-Smooth<-function( res,#RES$DRres #the result summary information table RES<-getSummaryInf(rdat) #need bx bxse by byse mean est se
+#to-do list: (1) now res = RES only
+#(2) use my WLR code; not via fda function; and add the added-stype basisfunction and use the same style as the smooth_SOF
+
+
+Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getSummaryInf(rdat) #need bx bxse by byse mean est se
+                  StraMet='DR', #stratification method; default is 'DR'
                   Rall=NA, #A vector: Exposure range for smoothing and visualization
                   baseline=NA, #the baseline exposure value for orginal causal effect shape
+                  splinestyle='Bspline' , #spline type
                   Norder=1,
+                  XYmodel='0', #tell me what the true X-Y effect shape is?
                   Knots=NA, #internal knots;  c(1,2,3) or '3' (character)
                   Lambda=0,  #tuning parameter for roughness; lambda=0 means no roughness penalty
                   random_effect=TRUE,
                   getHeterQ=TRUE, #if to show the Q and trend test p-value for the differentiate function plot?
-                  Plot=FALSE  #logic; Plot=TRUE will automatically print the two ggplots
+                  Plot=FALSE,  #logic; Plot=TRUE will automatically print the two ggplots
+                  ylim_used=NA  #the user-defined ylim range for h'(x) plot
 ){
+  if(!StraMet%in%c('DR','R') ){stop('please use the correct stratification method name')}
+  if(StraMet=='DR'){res<-RES$DRres;weightfun<-RES$DRweightfun}
+  if(StraMet=='R'){res<-RES$Rres;weightfun<-RES$Rweightfun}
+
   if(getHeterQ){
     Sr<-mr_ivw(mr_input(res$bx, res$bxse ,res$by, res$byse))#naive IVW under null (no effect heterogeneity)
     #mr_ivw是免疫NA的，即，即使把NA移除掉，naive IVW estimate依旧是一样的
@@ -27,20 +39,27 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
 
     ###meta regression trend test (using x and x^2 up to second order)
     metadat<-data.frame(  est=res$est , se=res$se, mean=res$mean     )
-    metares<-rma(yi=est, sei=se, mods =cbind(mean , mean^2 ), data = metadat)
-    TrendValues<-c( metares$QM , metares$QMdf[1] , metares$QMp    )
+    if(nrow(res)==2){#注意 rma还需要估计原文中tau^2的大小，所以存在一个额外的parameter；并不是最简单的WLR,所以Ns=2时只用Q就好
+      metares<-list(pval=rep(NA,3))
+      TrendValues<-rep(NA,3)
+    }else{
+      #metares<-rma(yi=est, sei=se, mods =cbind(mean , mean^2 ), data = metadat)
+      metares<-rma(yi=est, sei=se, mods =cbind(mean ), data = metadat)
+      TrendValues<-c( metares$QM , metares$QMdf[1] , metares$QMp    )
+    }
   }
 
   SmoothRes<-list()
   #get the minimal useful information table
-  RES<-as.data.frame(cbind( res$mean,res$est , res$se  ))
-  names(RES)<-c('mean', 'est', 'se'  )
+  mRES<-as.data.frame(cbind( res$mean,res$est , res$se  ))
+  names(mRES)<-c('mean', 'est', 'se'  )
   #romove the NA values
-  RES<-na.omit(RES)
-  Ns<-nrow(RES) #the number of stratum after removing NA values
+  mRES<-na.omit(mRES)
+  Ns<-nrow(mRES) #the number of stratum after removing NA values
 
   if(is.na(Rall)){
-    Rall<-c(min( RES$mean)-1, max(RES$mean)+1    )
+    #Rall<-c(min( mRES$mean)-1, max(mRES$mean)+1    )
+    Rall<-c(  min(res$min  ), max(res$max  )  )
     cat('The exposure range used: ', Rall,'\n')}
 
   if(is.vector(Knots)){
@@ -59,54 +78,106 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   }
   cat('The internal knots are: ', internal_knots,' (Empty means no internal knots used)','\n')
 
-  Bs<-create.bspline.basis(  c(Rall[1],Rall[2])  ,
-                             breaks=c(  Rall[1],  internal_knots ,  Rall[2] ) ,
-                             norder=Norder )
-  Par <- fdPar( fdobj=Bs, Lfdobj=NULL, lambda=Lambda )#都默认不用penalty;这里应该没问???
-  smoothed_LACE <- smooth.basis(  RES$mean  , RES$est , Par ,wtvec=1/RES$se^2 )$fd
-  dsdf<-smooth.basis(  RES$mean  , RES$est , Par ,wtvec=1/RES$se^2 )$df  # = # of interor knots + order
-  thetahat<-smoothed_LACE$coefs
-  SmoothRes$thetahat<-as.vector(thetahat)
+
+
+
+  time_obs<-seq(Rall[1],Rall[2],len=1000) #visualization points
+
+  if(splinestyle=='Bspline'){
+    Bs<-create.bspline.basis(  c(Rall[1],Rall[2])  ,
+                               breaks=c(  Rall[1],  internal_knots ,  Rall[2] ) ,
+                               norder=Norder )
+    # Par <- fdPar( fdobj=Bs, Lfdobj=NULL, lambda=Lambda )#都默认不用penalty;这里应该没问???
+    # smoothed_LACE <- smooth.basis(  mRES$mean  , mRES$est , Par ,wtvec=1/mRES$se^2 )$fd
+    # dsdf<-smooth.basis(  mRES$mean  , mRES$est , Par ,wtvec=1/mRES$se^2 )$df  # = # of interior knots + order
+    # thetahat<-smoothed_LACE$coefs
+    # SmoothRes$thetahat<-as.vector(thetahat)
+
+    MMM<- eval.basis(   mRES$mean , Bs      )  #function values at the  RES$mean position (mean_exposure observed position)
+    #dim(MMM) #Ns [basisfunction number]
+
+
+    MM<- eval.basis(  time_obs , Bs      )  #matrix of basis function values in all positions
+  }else{
+    #use the added-style spline ( only can be used for Noder=1 case; i.e. constant basis function)
+    if(Norder!=1){stop('other spline type only currently valid for Norder=1')}
+
+    #MMM: matrix of basis function values in the stratum exposure mean values
+    #MM: matrix of basis function values in all positions
+    #dim(MM) #1000 * [basisfunction number]
+
+    MMM<-rep( 1,length(mRES$mean) )
+    for(i in 1:length(internal_knots)){
+      MMM<-cbind(MMM , as.numeric(mRES$mean>=internal_knots[i]) )
+    }
+
+
+    MM<-rep( 1,length(time_obs) )
+    for(i in 1:length(internal_knots)){
+      MM<-cbind(MM , as.numeric(time_obs>=internal_knots[i]) )
+    }
+
+
+  }
+
+
+
   ###use my code with SLR, no black box
-  #SSigma<-diag(  1/RES$se )#standard (non-squared) sigma; i.e. Sigma^{-1/2}
-  #yy<-SSigma%*%RES$est
-  MMM<- eval.basis(   RES$mean , Bs      )  #function values at the  RES$mean position (mean_exposure observed position)
-  #XX<-SSigma%*%MMM
-  #SLRthetahat<-solve(  t( XX)%*%XX )%*% t( XX)%*% yy  #Simple linear regression
+  SSigma<-diag(  1/mRES$se )#standard (non-squared) sigma; i.e. Sigma^{-1/2}
+  yy<-SSigma%*%mRES$est
+
+  XX<-SSigma%*%MMM
+  SLRthetahat<-solve(  t( XX)%*%XX )%*% t( XX)%*% yy  #Simple (unweighted) linear regression
+
+  thetahat<-as.vector(SLRthetahat)
+  SmoothRes$thetahat<-thetahat
+
   #clear! 关键在于wtvec需要使用平方量  #checked! 没毛病
   ###接着估计tau^2???
   #直接用原始的weighted regression - LRT:  当然用SLR也行： yy<-SSigma%*%RES$est # XX<-SSigma%*%MMM
+
   temp<-MMM%*%thetahat# fitted values
+  dsdf<-Norder+length(internal_knots  ) #degree-of-freedom
   if(random_effect){
     if(Ns==dsdf){
       tau2<-1   #这里主要是考虑到完全full model的情???(即，fractional polynomial method)，此时df分母=0 容易报错
     }else{
-      tau2<-max(1,sum(  (RES$est-temp)^2/RES$se^2     )/(  Ns- dsdf))#没有roughness penalty，那df自然是整???
+      tau2<-max(1,sum(  (mRES$est-temp)^2/mRES$se^2     )/(  Ns- dsdf))#没有roughness penalty，那df自然是整???
       }
     cat('Random-effect is considered for smoothing and the actual random effect squared value is: ', tau2,'\n')
   }else{
     tau2<-1
   }
 
+
+
   #AIC
   ###STEP5: also return the AIC (for model selection purpose)
-  Sigma<-diag(    RES$se^2  )
+  Sigma<-diag(    mRES$se^2  )
   SSSigma<-Sigma*tau2  #times tau for random-effect setting
-  AIC<- 2*log(  det(  SSSigma )      ) + t(RES$est-MMM%*%thetahat)%*%solve(SSSigma)%*%(RES$est-MMM%*%thetahat) + 2*dsdf
-  SmoothRes$AIC<-AIC
 
+  varthetahat<-solve( t(MMM) %*% solve(Sigma) %*% MMM )  * tau2  #经典WLR的系数估计量的方差
+
+  SmoothRes$var.matrix<-varthetahat
+
+
+
+  AIC<- 2*log(  det(  SSSigma )      ) + t(mRES$est-MMM%*%thetahat)%*%solve(SSSigma)%*%(mRES$est-MMM%*%thetahat) + 2*dsdf
+  SmoothRes$AIC<-AIC
+  BIC<- 2*log(  det(  SSSigma )      ) + t(mRES$est-MMM%*%thetahat)%*%solve(SSSigma)%*%(mRES$est-MMM%*%thetahat) + log(Ns)*dsdf
+  SmoothRes$BIC<-BIC
   #or: use Simple Linear Regression
   #tau2<-max(1,sum( (yy-XX%*%SLRthetahat )^2 )/(Ns -dsdf))#checked 确实是一样的
 
 
   ###Following inference
-  time_obs<-seq(Rall[1],Rall[2],len=1000) #visualization points
+
 
   ###WLR with fda code
-  y2cMap<- smooth.basis(  RES$mean  , RES$est , Par ,wtvec=1/RES$se^2 )$y2cMap
-  varthetahat<-y2cMap %*% diag(  RES$se^2 )  %*% t(y2cMap  )* tau2  #经典WLR的系数估计量的方差
-
-  SmoothRes$var.matrix<-varthetahat
+  # y2cMap<- smooth.basis(  mRES$mean  , mRES$est , Par ,wtvec=1/mRES$se^2 )$y2cMap
+  # varthetahat<-y2cMap %*% diag(  mRES$se^2 )  %*% t(y2cMap  )* tau2  #经典WLR的系数估计量的方差
+  #
+  # SmoothRes$var.matrix<-varthetahat
   summary_table<-cbind( as.vector(thetahat),
                         sqrt(as.vector(diag(varthetahat))))  #marginal s.e.s
   #依据tau2的值来判断使用Z-tes还是t-testt；毕竟tau2==1时，相当于normal variance 不被估计的情???
@@ -119,25 +190,45 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   rownames(summary_table)<-paste0('Par',1:length(thetahat))
   SmoothRes$summary<-round(summary_table,3)
   #y2cMap表达式上就是solve(  t( XX)%*%XX )%*% t( XX)%*%SSigma；含义就是WLR的hat matrix
-  MM<- eval.basis(  time_obs , Bs      )  #matrix of basis function values in all positions
+  #MM<- eval.basis(  time_obs , Bs      )  #matrix of basis function values in all positions
   #dim(MM) #1000 dsdf #df=degree-of-freedom= # of theta parameters
+
+
+  ###final functional pointwise estimator and s.e.
   varM<- MM %*% varthetahat %*%  t(  MM)  #最后一向是random-effect
 
   pw_std_error<-sqrt( diag(varM) )  #由于是Pointwise, 只取对角线元素即???
-  smoothed_LACE_<-eval.fd(    time_obs ,smoothed_LACE )
+  #smoothed_LACE_<-eval.fd(    time_obs ,smoothed_LACE )
+
+  smoothed_LACE_<-MM%*%thetahat
 
   # plot(time_obs,smoothed_LACE_,type='l')
   # lines(time_obs , smoothed_LACE_+1.96*pw_std_error, lty=2, lwd=1        )
   # lines( time_obs, smoothed_LACE_-1.96*pw_std_error, lty=2, lwd=1          )
 
-  ggdata<-data.frame( tps=RES$mean, est = RES$est,
-                      estlow=RES$est -1.96*RES$se,
-                      estup=RES$est +1.96*RES$se
+  ggdata<-data.frame( tps=mRES$mean, est = mRES$est,
+                      estlow=mRES$est -1.96*mRES$se,
+                      estup=mRES$est +1.96*mRES$se
   )
   ggsmooth<-data.frame( time_obs=time_obs,
                         smoothed_LACE_=smoothed_LACE_,
                         smooth_low=smoothed_LACE_-1.96*pw_std_error,
                         smooth_up=smoothed_LACE_+1.96*pw_std_error)
+  ggreal<-data.frame( tps=time_obs,
+                      est=NaN)
+  ##now assign the nonlinear_dif
+  if( XYmodel=='1' ){    nonlinear_dif<-function(t){ sapply(   t , function(tt){ 0}) }     }
+  if( XYmodel=='2' ){    nonlinear_dif<-function(t){0.2*t}   }
+  if( XYmodel=='3' ){    nonlinear_dif<-function(t){-0.2*t*(t>0)}    }
+  if( XYmodel=='4' ){    nonlinear_dif<-function(t){5.0*(t>0.6) }  }  #5.0*(t>0.6)  #45*t-30.0*t^2
+  if( XYmodel%in%c('1','2','3','4') ){ ggreal$est<-nonlinear_dif(time_obs)    }
+
+  if(is.na(ylim_used)[1]){
+    ylim_used <- c( min(res$est-1.96*res$se)-max(res$se),max(res$est+1.96*res$se)+max(res$se))
+  }else{
+    ylim_used <- ylim_used
+  }
+
   if(getHeterQ){
     p<-ggplot(ggdata, aes(tps, est))+
       geom_point(data=ggdata,mapping=aes(x=tps,y=est),color='black',alpha=1)+
@@ -145,13 +236,14 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
       geom_line(data=ggsmooth,mapping=aes(x=time_obs,y=smoothed_LACE_),color='black',alpha=1)+
       geom_line(data=ggsmooth,mapping=aes(x=time_obs,y=smooth_low),color='black',alpha=1,linetype='dashed')+
       geom_line(data=ggsmooth,mapping=aes(x=time_obs,y=smooth_up),color='black',alpha=1,linetype='dashed')+
+      geom_line(data=ggreal,mapping=aes(x=tps,y=est),color='blue',alpha=1)+
       geom_hline( yintercept=0, color='grey',linetype='dashed')+
       labs(x='Exposure level',y='LACE estimates',
            subtitle =paste0("Q value/df/p-value: ",round(HeterQ[1],3),'/',HeterQ[2],'/',HeterQ[3],
                             '\n','Trend test value/df/p-value: ', round(TrendValues[1],3), '/',TrendValues[2],'/',round(TrendValues[3],6),
                             '\n','specific order term pvalues: ', round(metares$pval[2],3), ',', round(metares$pval[3],3)  ) )+
       theme_bw()+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
-      coord_cartesian(ylim = c( min(res$est-1.96*res$se)-max(res$se),max(res$est+1.96*res$se)+max(res$se)) ) #0.5这个距离有时候会很大
+      coord_cartesian(ylim =ylim_used ) #0.5这个距离有时候会很大
   }else{
     p<-ggplot(ggdata, aes(tps, est))+
       geom_point(data=ggdata,mapping=aes(x=tps,y=est),color='black',alpha=1)+
@@ -159,10 +251,11 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
       geom_line(data=ggsmooth,mapping=aes(x=time_obs,y=smoothed_LACE_),color='black',alpha=1)+
       geom_line(data=ggsmooth,mapping=aes(x=time_obs,y=smooth_low),color='black',alpha=1,linetype='dashed')+
       geom_line(data=ggsmooth,mapping=aes(x=time_obs,y=smooth_up),color='black',alpha=1,linetype='dashed')+
+      geom_line(data=ggreal,mapping=aes(x=tps,y=est),color='blue',alpha=1)+
       geom_hline( yintercept=0, color='grey',linetype='dashed')+
       labs(x='Exposure level',y='LACE estimates' )+
       theme_bw()+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
-      coord_cartesian(ylim = c( min(res$est-1.96*res$se)-max(res$se),max(res$est+1.96*res$se)+max(res$se)) )
+      coord_cartesian(ylim = ylim_used )
   }
 
   if(Plot){print(p)}
@@ -186,8 +279,9 @@ Smooth<-function( res,#RES$DRres #the result summary information table RES<-getS
   # #已经check；确实是一模一???
 
   ###For original effect shape
-  if(is.na(baseline)){baseline<-RES$mean[1]}
+  if(is.na(baseline)){baseline<-mRES$mean[1]}
   baseline_used<-time_obs[sum(time_obs<=baseline)]
+  cat(time_obs[1],time_obs[1000],baseline,'\n')
   cat('The actual basline value used:',baseline_used ,'\n')
 
   #DD: the integration matrix for the basisfunctions with given baseline exposrue level
