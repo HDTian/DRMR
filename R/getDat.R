@@ -32,7 +32,7 @@ getDat<-function(N=10000,
 
   ##Z-X model
 
-  if(!ZXmodel%in%c( 'A', 'B', 'BC', 'C','D','E','F','G','H' ) ){stop('please use the correct ZXmodel index')}
+  if(!ZXmodel%in%c( 'A', 'B', 'BC', 'C','CC','D','E','F','G','H' ) ){stop('please use the correct ZXmodel index')}
 
   if( (IVtype %in% c('cont', 'bi')  )&(ZXmodel%in%c('E','F','G','H')) ){
     stop('please use the appropriate combination of the IVtype and the ZXmodel')
@@ -54,6 +54,11 @@ getDat<-function(N=10000,
   if(ZXmodel=='C'){
     h_X<-function(Z,U){ -10+ (1.5+0.4*U)*(Z+5) }
     X<-h_X(Z,U2)+U2 +U1        }
+  #ZXmode=='CC': particularly designed for SoF paper close to the real example
+  if(ZXmodel=='CC'){  #now use the strict RPA
+    h_X<-function(Z,U){ -10+ (1.0+0.2*U)*(Z+5) }
+    X<-h_X(Z,U2)+1*U2  #+U1 #保证绝对的RPA
+    X<-exp(0.1*X)}
   if(ZXmodel=='D'){
     h_X<-function(Z){ 0.5*Z  }
     X<-h_X(Z)+U2+U1
@@ -84,7 +89,7 @@ getDat<-function(N=10000,
   ##X-Y model
 
 
-  if(!XYmodel%in%c( '1','2','3' ) ){stop('please use the correct XYmodel index')}
+  if(!XYmodel%in%c( '1','2','3' , '4') ){stop('please use the correct XYmodel index')}
   if(XYmodel=='1'){
     nonlinear<-function(t){0*t} #constant effect; i.e. linear effect
     nonlinear_dif<-function(t){ sapply(   t , function(tt){ 0}) }
@@ -97,6 +102,16 @@ getDat<-function(N=10000,
     nonlinear<-function(t){-0.1*(t)^2*(t>0) }
     nonlinear_dif<-function(t){-0.2*t*(t>0)}
   }
+  # #jump function
+  if(XYmodel=='4'){
+    nonlinear<-function(t){(t>0.6)*5.0*(t-0.6) }
+    nonlinear_dif<-function(t){5.0*(t>0.6)}
+  }
+  #second order function
+  # if(XYmodel=='4'){
+  #   nonlinear<-function(t){22.5*t^2-10.0*t^3 }
+  #   nonlinear_dif<-function(t){45*t-30.0*t^2}  #plot( seq(0.5,1.0,length=100), nonlinear_dif( seq(0.5,1.0,length=100) ), type='l'   )
+  # }
 
 
 
@@ -114,7 +129,7 @@ getDat<-function(N=10000,
   return(  dat )
 }
 
-# rdat<-getDat(IVtype='high-dim', ZXmodel='G',printRR=TRUE )
+# dat<-getDat(IVtype='high-dim', ZXmodel='G',printRR=TRUE )
 
 
 

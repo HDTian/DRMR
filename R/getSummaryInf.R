@@ -43,7 +43,7 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
   }
 
 
-  if( target&stratify_on_X_or_not&(!XYmodel%in%c('1','2','3'))    ){
+  if( target&stratify_on_X_or_not&(!XYmodel%in%c('1','2','3','4'))    ){
     if( exists('dif')){
       print('The (derivative) causal function is')
       print( dif )
@@ -51,10 +51,11 @@ getSummaryInf<-function(rdat, #rdat #rdat<-Stratify(dat)   i.e. stratified indiv
   }
 
   ##now assign the nonlinear_dif
-  if( !XYmodel%in%c('1','2','3') ){   nonlinear_dif<-dif      }
+  if( !XYmodel%in%c('1','2','3','4') ){   nonlinear_dif<-dif      }
   if( XYmodel=='1' ){    nonlinear_dif<-function(t){ sapply(   t , function(tt){ 0}) }     }
   if( XYmodel=='2' ){    nonlinear_dif<-function(t){0.2*t}   }
   if( XYmodel=='3' ){    nonlinear_dif<-function(t){-0.2*t*(t>0)}    }
+  if( XYmodel=='4' ){    nonlinear_dif<-function(t){0.05*(t>20)}   }
 
 
   if( is.null(rdat$X_) ){ rdat$X_<-rdat$X  } #Target effect is the expected stratum-specific effect without any error (either confounding or coarsened error)
