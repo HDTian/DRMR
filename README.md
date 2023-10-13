@@ -140,7 +140,7 @@ There are several methods for smoothing the stratification estimation (the strat
 
 To use the fractional polynomial method (e.g. of degree 2 with first and second order) with the doubly-ranked stratification, run
 ```R
-smooth_res<-Smooth(RES$DRres,Norder=3,baseline=0) #RES is the result returned by getSummaryInf()
+smooth_res<-Smooth(RES,Norder=3,baseline=0) #RES is the result returned by getSummaryInf()
 ```
 If you wish to visualize the results, simply run `smooth_res$p ` or `smooth_res$hp`
 ![Rplot](https://user-images.githubusercontent.com/127906571/232224279-908bc7f7-8e38-4871-b4f5-0f19077d569a.png)
@@ -153,7 +153,7 @@ If you wish to visualize the results, simply run `smooth_res$p ` or `smooth_res$
 To use the piecewise linear method with the doubly-ranked stratification, run:
 ```R
 cutting_values<-(RES$DRres$mean[-1] + head( RES$DRres$mean,-1) )/2
-smooth_res<-Smooth(RES$DRres,Norder=1,baseline=0,Knots=cutting_values)
+smooth_res<-Smooth(RES,Norder=1,baseline=0,Knots=cutting_values)
 ```
 [^smoothing]: https://onlinelibrary.wiley.com/doi/full/10.1002/gepi.22041
 
@@ -186,7 +186,7 @@ Assume you now have the samples in a data frame `dat` with correctly named varia
 ```R       
 rdat<-Stratify(dat)
 RES<-getSummaryInf(rdat)
-smooth_res<-Smooth(RES$DRres,Norder=3,baseline=0)
+smooth_res<-Smooth(RES,Norder=3,baseline=0)
 ```      
 then you can use the information in `RES` and `smooth_res` (try `?Stratify`, `?getSummaryInf` and `?Smooth` to check the details) to build the results you desire[^further].
 
