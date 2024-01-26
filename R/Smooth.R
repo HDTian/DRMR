@@ -284,6 +284,10 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
   cat(time_obs[1],time_obs[1000],baseline,'\n')
   cat('The actual basline value used:',baseline_used ,'\n')
 
+  if(    (time_obs[1]-baseline)*(time_obs[2]-baseline)>0     ){
+    stop('please use the proper baseline value so it is inside the exposure range')
+    }
+
   #DD: the integration matrix for the basisfunctions with given baseline exposrue level
   DD<-apply( MM, 2, cumsum )*(Rall[2]-Rall[1] )/(1000-1)  #\int_{Rall[1]}^x theta(s)ds where x=time_obs
   BaseInt<-matrix(rep( DD[sum(time_obs<=baseline),],1000  ), byrow=TRUE,nrow=1000 ) #int_{Rall[1]}^{baseline_used~+} theta(s)ds   #保证baseline_used那一行DD???0
