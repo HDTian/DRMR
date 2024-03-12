@@ -6,6 +6,8 @@ Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method
 This manuscript will demonstrate the fundamental concepts of DR stratification and provide a simple, step-by-step guide for applying this method. Subsequent papers will appear to provide further details and insights.[^1].
 [^1]: Different papers would use different writing style for illustration and interpretation. Contact me if you are confused or interested in any aspect of the DR stratification method.
 
+[Relaxing parametric assumptions for non-linear Mendelian randomization using a doubly-ranked stratification method]([https://openai.com](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1010823))
+
 
 You can Install the DRMR package from Github with:
 ```R
