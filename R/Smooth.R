@@ -39,7 +39,7 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
 
     ###meta regression trend test (using x and x^2 up to second order)
     metadat<-data.frame(  est=res$est , se=res$se, mean=res$mean     )
-    if(nrow(res)==2){#注意 rma还需要估计原文中tau^2的大小，所以存在一个额外的parameter；并不是最简单的WLR,所以Ns=2时只用Q就好
+    if(nrow(res)==2){#注意 rma还需要估计原文中tau^2的大小，所以存在一个额外的parameter；并不是最简单的WLR,所�?Ns=2时只用Q就好
       metares<-list(pval=rep(NA,3))
       TrendValues<-rep(NA,3)
     }else{
@@ -63,7 +63,7 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
     cat('The exposure range used: ', Rall,'\n')}
 
   if(is.vector(Knots)){
-    internal_knots<-sort(Knots)  #sort(NA) -> logical(0); 会被breaks这个vector自动忽略
+    internal_knots<-sort(Knots)  #sort(NA) -> logical(0); 会�?�breaks这个vector自动忽略
     if( sum( !c(Rall[1]<internal_knots,internal_knots<Rall[2]) )>0 ){
       stop('make sure that the internal knots are inside the Rall')
     }
@@ -132,15 +132,15 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
   thetahat<-as.vector(SLRthetahat)
   SmoothRes$thetahat<-thetahat
 
-  #clear! 关键在于wtvec需要使用平方量  #checked! 没毛病
+  #clear! 关键在于wtvec需要使用平方量  #checked! 没毛�?
   ###接着估计tau^2???
-  #直接用原始的weighted regression - LRT:  当然用SLR也行： yy<-SSigma%*%RES$est # XX<-SSigma%*%MMM
+  #直接用原始的weighted regression - LRT:  当然用SLR也行�? yy<-SSigma%*%RES$est # XX<-SSigma%*%MMM
 
   temp<-MMM%*%thetahat# fitted values
   dsdf<-Norder+length(internal_knots  ) #degree-of-freedom
   if(random_effect){
     if(Ns==dsdf){
-      tau2<-1   #这里主要是考虑到完全full model的情???(即，fractional polynomial method)，此时df分母=0 容易报错
+      tau2<-1   #这里主�?�是考虑到完全full model的情???(即，fractional polynomial method)，此时df分母=0 容易报错
     }else{
       tau2<-max(1,sum(  (mRES$est-temp)^2/mRES$se^2     )/(  Ns- dsdf))#没有roughness penalty，那df自然是整???
       }
@@ -156,7 +156,7 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
   Sigma<-diag(    mRES$se^2  )
   SSSigma<-Sigma*tau2  #times tau for random-effect setting
 
-  varthetahat<-solve( t(MMM) %*% solve(Sigma) %*% MMM )  * tau2  #经典WLR的系数估计量的方差
+  varthetahat<-solve( t(MMM) %*% solve(Sigma) %*% MMM )  * tau2  #经典WLR的系数估计量的方�?
 
   SmoothRes$var.matrix<-varthetahat
 
@@ -175,12 +175,12 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
 
   ###WLR with fda code
   # y2cMap<- smooth.basis(  mRES$mean  , mRES$est , Par ,wtvec=1/mRES$se^2 )$y2cMap
-  # varthetahat<-y2cMap %*% diag(  mRES$se^2 )  %*% t(y2cMap  )* tau2  #经典WLR的系数估计量的方差
+  # varthetahat<-y2cMap %*% diag(  mRES$se^2 )  %*% t(y2cMap  )* tau2  #经典WLR的系数估计量的方�?
   #
   # SmoothRes$var.matrix<-varthetahat
   summary_table<-cbind( as.vector(thetahat),
                         sqrt(as.vector(diag(varthetahat))))  #marginal s.e.s
-  #依据tau2的值来判断使用Z-tes还是t-testt；毕竟tau2==1时，相当于normal variance 不被估计的情???
+  #依据tau2的值来判断使用Z-tes还是t-testt；毕竟tau2==1时，相当于normal variance 不�?�估计的�????
   if(tau2==1){
     summary_table<-cbind(summary_table,2*(1-pnorm(  abs(as.vector(thetahat)/sqrt(as.vector(diag(varthetahat))))  )   ) )
   }else{
@@ -197,7 +197,7 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
   ###final functional pointwise estimator and s.e.
   varM<- MM %*% varthetahat %*%  t(  MM)  #最后一向是random-effect
 
-  pw_std_error<-sqrt( diag(varM) )  #由于是Pointwise, 只取对角线元素即???
+  pw_std_error<-sqrt( diag(varM) )  #由于是Pointwise, 只取对�?�线元素�????
   #smoothed_LACE_<-eval.fd(    time_obs ,smoothed_LACE )
 
   smoothed_LACE_<-MM%*%thetahat
@@ -243,7 +243,10 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
                             '\n','Trend test value/df/p-value: ', round(TrendValues[1],3), '/',TrendValues[2],'/',round(TrendValues[3],6),
                             '\n','specific order term pvalues: ', round(metares$pval[2],3), ',', round(metares$pval[3],3)  ) )+
       theme_bw()+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
-      coord_cartesian(ylim =ylim_used ) #0.5这个距离有时候会很大
+      coord_cartesian(ylim =ylim_used ) #0.5这个距�?�有时候会很大
+    #updates: now added the Q test and Trend test results
+    SmoothRes$Q_test<-c(  'Q value'=round(HeterQ[1],3) , 'df'=HeterQ[2] , 'p-value'=HeterQ[3]  )
+    SmoothRes$Trend_test<-c(  'Trend test value'=round(TrendValues[1],3) , 'df'=TrendValues[2] , 'p-value'=round(TrendValues[3],6) )
   }else{
     p<-ggplot(ggdata, aes(tps, est))+
       geom_point(data=ggdata,mapping=aes(x=tps,y=est),color='black',alpha=1)+
@@ -271,7 +274,7 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
   ###SLR with my code
   # varSLRthetahat<-solve(  t( XX)%*%XX )*tau2
   # varM<- MM %*% varSLRthetahat %*%  t(  MM)
-  # pw_std_error<-sqrt( diag(varM) )  #由于是Pointwise, 只取对角线元素即???
+  # pw_std_error<-sqrt( diag(varM) )  #由于是Pointwise, 只取对�?�线元素�????
   # smoothed_LACE_<-eval.fd(    time_obs ,smoothed_LACE )
   # plot(time_obs,smoothed_LACE_,type='l')
   # lines(time_obs , smoothed_LACE_+1.96*pw_std_error, lty=2, lwd=1        )
@@ -296,14 +299,14 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
   hest<-DD%*%thetahat  #h(x) pointwise est
 
   varD<- DD %*% varthetahat %*%  t(  DD)  #最后一项是random-effect
-  pw_std_error<-sqrt( diag(varD) )  #由于是Pointwise, 只取对角线元素即???
+  pw_std_error<-sqrt( diag(varD) )  #由于是Pointwise, 只取对�?�线元素�????
 
   # plot(time_obs,hest,type='l', xlab='exposure level'  , ylab='h(x)')
   # lines(time_obs , hest+1.96*pw_std_error, lty=2, lwd=1        )
   # lines( time_obs, hest-1.96*pw_std_error, lty=2, lwd=1          )
   # abline(  h=0  ,lty=2, col ='blue' )
   # abline(  v=baseline_used  ,lty=2, col ='blue' )
-  #checked, 两种DD的构造方法的可视化结果几乎一模一样！
+  #checked, 两�?�DD的构造方法的可�?�化结果几乎一模一样！
 
   ggsmooth<-data.frame( time_obs=time_obs,
                         hest=hest,
@@ -317,7 +320,7 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
     geom_vline( xintercept=baseline_used, color='grey',linetype='dashed')+
     labs(x='Exposure level',y='Effect')+
     theme_bw()+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
-    coord_cartesian(ylim = c( min(hest)-max(pw_std_error),max(hest)+max(pw_std_error)) )  #1 或者0.5这些距离都太大了
+    coord_cartesian(ylim = c( min(hest)-max(pw_std_error),max(hest)+max(pw_std_error)) )  #1 或�?0.5这些距�?�都太大�?
   if(Plot){print(hp)}
   SmoothRes$hp<-hp
 
