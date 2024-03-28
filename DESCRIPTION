@@ -12,6 +12,7 @@ Imports:
   dplyr,
   fda,
   fda.usc,
+  metafor,
   ggplot2,
   MendelianRandomization
   
