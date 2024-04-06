@@ -41,7 +41,7 @@ getDat<-function(N=10000,
 \references{
 \cite{Tian, H., Mason, A. M., Liu, C., & Burgess, S. (2022). "Relaxing parametric assumptions for non-linear Mendelian randomization using a doubly-ranked stratification method". bioRxiv, 2022-06. (Doubly-ranked stratification)}
 }
-}
+
 \author{
 %%  ~~who you are~~
 }
