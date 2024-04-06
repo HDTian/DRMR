@@ -13,7 +13,7 @@ getDat<-function(N=10000,
                  ZXmodel='A',
                  XYmodel='1',
                  printRR=FALSE
-)
+                )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

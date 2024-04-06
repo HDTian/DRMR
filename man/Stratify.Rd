@@ -8,7 +8,7 @@ Stratification
 Do doubly-ranked and residual stratification on a data
 }
 \usage{
-Stratify(dat, onExposure = TRUE, Ns = 10, SoP = NA)
+Stratify(dat, onExposure = TRUE, Ns = 10, SoP = NA, seed = NA)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -41,18 +41,7 @@ Note that the \code{Stratify} function will not induce internal randomness auton
 
 \cite{Tian, H., Mason, A. M., Liu, C., & Burgess, S. (2022). "Relaxing parametric assumptions for non-linear Mendelian randomization using a doubly-ranked stratification method". bioRxiv, 2022-06. (Doubly-ranked stratification)}
 }
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 dat<-getDat( IVtype='cont', ZXmodel='C',XYmodel='2' )
 rdat<-Stratify(dat)

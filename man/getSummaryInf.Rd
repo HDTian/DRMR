@@ -9,7 +9,7 @@ Return the summary information of each stratum
 }
 \usage{
 getSummaryInf(rdat,
-              family_used='gaussian'
+              family_used='gaussian',
               covariate=FALSE,
               target = FALSE,
               XYmodel = "1",

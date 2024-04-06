@@ -77,18 +77,7 @@ The smoothing is based on B-spline system. Relevant papers will be appear to pro
 \references{
 \cite{Staley J R, Burgess S. Semiparametric methods for estimation of a nonlinear exposure-outcome relationship using instrumental variables with application to Mendelian randomization[J]. Genetic epidemiology, 2017, 41(4): 341-352.}
 }
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 dat<-getDat( IVtype='cont', ZXmodel='C',XYmodel='2' )
 rdat<-Stratify(dat)
@@ -96,11 +85,11 @@ RES<-getSummaryInf( rdat,target=FALSE)
 
 
 #the fractional polynomial method (e.g. with degree 2)
-smooth_res<-Smooth(RES$DRres,Norder=3,baseline=0)
+smooth_res<-Smooth(RES,Norder=3,baseline=0)
 
 #the piecewise linear method
 cutting_values<-(RES$DRres$mean[-1] + head( RES$DRres$mean,-1) )/2
-smooth_res<-Smooth(RES$DRres,Norder=1,baseline=0,Knots=cutting_values)
+smooth_res<-Smooth(RES,Norder=1,baseline=0,Knots=cutting_values)
 
 }
 
