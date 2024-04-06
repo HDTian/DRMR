@@ -8,11 +8,11 @@ Get a Toy Data
 Creat a simulated data set for stratification
 }
 \usage{
-getDat<-function(N=10000,
-                 IVtype='cont',
-                 ZXmodel='A',
-                 XYmodel='1',
-                 printRR=FALSE
+getDat(N=10000,
+       IVtype='cont',
+       ZXmodel='A',
+       XYmodel='1',
+       printRR=FALSE
                 )
 }
 %- maybe also 'usage' for other objects documented here.
