@@ -83,6 +83,8 @@ dat<-getDat( IVtype='cont', ZXmodel='C',XYmodel='2' )
 rdat<-Stratify(dat)
 RES<-getSummaryInf( rdat,target=FALSE)
 
+library(metafor)
+
 
 #the fractional polynomial method (e.g. with degree 2)
 smooth_res<-Smooth(RES,Norder=3,baseline=0)
