@@ -11,3 +11,5 @@ import(fda)
 import(fda.usc)
 import(ggplot2)
 import(MendelianRandomization)
+importFrom(metafor, rma)
+
