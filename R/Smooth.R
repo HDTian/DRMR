@@ -287,7 +287,7 @@ Smooth<-function( RES,#RES$DRres #the result summary information table RES<-getS
   cat(time_obs[1],time_obs[1000],baseline,'\n')
   cat('The actual basline value used:',baseline_used ,'\n')
 
-  if(    (time_obs[1]-baseline)*(time_obs[2]-baseline)>0     ){
+  if(    (time_obs[1]-baseline)*(time_obs[1000]-baseline)>0     ){
     stop('please use the proper baseline value so it is inside the exposure range')
     }
 
