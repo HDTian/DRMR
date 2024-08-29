@@ -20,6 +20,9 @@ Alternatively, you can also try the SUMnlmr[^SUMnlmr] package, where the DR meth
 [^SUMnlmr]: https://github.com/amymariemason/SUMnlmr
 
 
+See [Real application](#real-application) for the guidance with your real data  
+See [FAQs](#faqs) for the frequently asked questions or contact me for suggestions
+
 ## Stratification
 When examining potential non-linear causal effects, one approach is to divide the population into multiple subgroups or strata, each with varying levels of exposure. IV analysis can then be applied to each stratum, and the stratum-specific IV estimates can reveal the underlying shape of the causal effect. There are three main stratification methods:
 |             | Naive stratification |Residual stratification[^R] |Doubly-ranked stratification[^DR] |
@@ -194,3 +197,15 @@ then you can use the information in `RES` and `smooth_res` (try `?Stratify`, `?g
 
 [^further]: Feel free to contact me if you have any further questions or need additional information that the current function cannot provide. I would be happy to discuss your study further and provide any assistance you may need.
 
+## FAQs
+(Q1) How to selected the appropriate value of "Norder" in "Smooth" function? Should it based on the AIC or BIC of the model (smooth_res)?<br>
+(A1) 'Norder' is a value controlling how flexible your fitted curve (ie effect shape) can be. There are many ways to determine it - even relying on your domain knowledge. AIC/BIC given here is also for 'Norder' selection, so you can choose your 'Norder' by, say, choosing the smallest AIC or BIC value.
+
+(Q2) What is the difference between "smooth_res1$hp" and "smooth_res1$p"?<br>
+(A2) Both 'smooth_res1$hp' and 'smooth_res1$p' returns you the fitted curve (ie effect shape). $hp returns you the original effect shape, while $p returns you the differentiated effect shape. So technically, $hp is the integral curve of $p. I personally prefer to use $p as the differentiated effect shape plot directly reflects the effect size at the corresponding local exposure value point
+
+(Q3) How should I interpret the result when the exposure is a continuous variable and the outcome is a binary variable?<br>
+(A3) When your exposure is continuous and your outcome is binary and your model is the logistic model. The returned LACE estimate is targeted to the log odds ratio - so, say, if you wish to interpret OR (and its 95% CI) you can simply adopt an exponential transformation to them.
+
+(Q4) How to determine if the association between them is linear or non-linear?<br>
+(A4) The left upper corner of your 'smooth_res1$p' figure provides two kinds of the tests on the effect shape. The null hypothesis is that the effect is linear, so any rejection (e.g. pvalue<0.05) should give you the evidence to conclude that the effect is nonlinear. You can choose any one of them, but typically, the trend test (at the second line) is of high power and may be recommended.
