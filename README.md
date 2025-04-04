@@ -3,14 +3,14 @@
 
 *Latest updated: Apr/04/2025*
 
-Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing homogeneity assumption, conducting nonlinear causal studies, and heterogeneous effects studies. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification results (also well connected with RFQT and SSS packages). 
+Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing homogeneity assumption, conducting nonlinear causal studies, and heterogeneous effects studies. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification results (also well connected with [RFQT](https://github.com/HDTian/RFQT) and [SSS](https://github.com/HDTian/SSS) packages). 
 
 By using the DRMR package, you will activate stratification-based analysis, allowing you:  
 ✅ drawing nonlinear IV/MR analysis  
-✅ estimate the exposure-outcome effect curve (supported by SSS)  
-✅ detect and estimate the effect change-point (supported by SSS)  
-✅ estimate individual and heterogeneous treatment effect (supported by RFQT)  
-✅ find the important effect drivers (supported by RFQT)  
+✅ estimate the exposure-outcome effect curve (supported by [SSS](https://github.com/HDTian/SSS))  
+✅ detect and estimate the effect change-point (supported by [SSS](https://github.com/HDTian/SSS))  
+✅ estimate individual and heterogeneous treatment effect (supported by [RFQT](https://github.com/HDTian/RFQT))  
+✅ find the important effect drivers (supported by [RFQT](https://github.com/HDTian/RFQT))  
 ✅ evaluating homogeneity conditions
 
 
@@ -31,11 +31,11 @@ TBA (Nonlinear MR)
 [A data-adaptive method for investigating effect heterogeneity with high-dimensional covariates in Mendelian randomization](https://link.springer.com/article/10.1186/s12874-024-02153-1)
 (high-dim effect heterogeneity)
 
-⚠️ One-sample individual-level data is required. This is not a drawback, as DRMR provides much more informative results that are not attainable through any summary-data method.  
+⚠️ One-sample individual-level data is required. This is not a drawback, as DRMR provides much more informative results that are not attainable through any summary-data method  
 ⚠️ All effect heterogeneity analyses can be robust to unreliable DR stratification. Even if DR stratification is unreliable, your effect heterogeneity results (those from RFQT) are typically not affected. The usage of DRMR and RFQT is not determined by whether or not DR stratification is reliable
 
 
-The remaining part will demonstrate the fundamental concepts of DR stratification and provide a simple, step-by-step guide for applying this method. You may want to skip, and directly see  
+The remaining part will demonstrate the fundamental concepts of DR stratification and provide a simple, step-by-step guide for applying this method for nonlinear Mendelian randomization. You may want to skip, and directly see  
 👉 [Real application](#real-application) for the guidance with your real data  
 👉 [FAQs](#faqs) for the frequently asked questions (remember you can always contact me for specific suggestions)
 
@@ -176,6 +176,11 @@ cutting_values<-(RES$DRres$mean[-1] + head( RES$DRres$mean,-1) )/2
 smooth_res<-Smooth(RES,Norder=1,Knots=cutting_values)
 ```
 [^smoothing]: https://onlinelibrary.wiley.com/doi/full/10.1002/gepi.22041
+
+
+## Advanced nonlinear effect analysis
+We are now able to draw complete stratification-based nonlinear effect analysis, including estimating any complicated (eg, jump) effect shape, and investigating the potential effect change-points/thresholds. Details are given in the new extended package [SSS](https://github.com/HDTian/SSS). We will make this available soon. 
+
 
 ## Real application
 The DRMR package follows a one-argument style, which means that in principle all you need to provide is a one-sample data frame. Before using the package, ensure that the input data is in the form of a dataframe:
