@@ -1,38 +1,53 @@
 # DRMR
 **Doubly-Ranked Stratification in Mendelian Randomization**
 
-Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing homogeneity assumption, conducting nonlinear causal studies, and heterogeneous effects studies. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification results. 
+*Latest updated: Apr/04/2025*
 
-This manuscript will demonstrate the fundamental concepts of DR stratification and provide a simple, step-by-step guide for applying this method. Subsequent papers will appear to provide further details and insights.[^1].
-[^1]: Different papers would use different writing style for illustration and interpretation. Contact me if you are confused or interested in any aspect of the DR stratification method.
+Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing homogeneity assumption, conducting nonlinear causal studies, and heterogeneous effects studies. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification results (also well connected with RFQT and SSS packages). 
 
-[Relaxing parametric assumptions for non-linear Mendelian randomization using a doubly-ranked stratification method](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1010823)
+By using the DRMR package, you will activate stratification-based analysis, allowing you:  
+✅ drawing nonlinear IV/MR analysis  
+✅ estimate the exposure-outcome effect curve (supported by SSS)  
+✅ detect and estimate the effect change-point (supported by SSS)  
+✅ estimate individual and heterogeneous treatment effect (supported by RFQT)  
+✅ find the important effect drivers (supported by RFQT)  
+✅ evaluating homogeneity conditions
 
 
-You can Install the DRMR package from Github with:
+
+You can install the DRMR package in R:
 ```R
 devtools::install_github("HDTian/DRMR")
 ```
 ```R
 library(DRMR)
 ```
-Alternatively, you can also try the SUMnlmr[^SUMnlmr] package, where the DR method was embedded. 
-[^SUMnlmr]: https://github.com/amymariemason/SUMnlmr
+you can also try the [SUMnlmr](https://github.com/amymariemason/SUMnlmr) package, where the DR method was embedded, but SUMnlmr currently does not support effect heterogeneity and effect change-point analysis 
+
+Related papers:  
+[Relaxing parametric assumptions for non-linear Mendelian randomization using a doubly-ranked stratification method](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1010823) (DR stratification)  
+[Violation of the Constant Genetic Effect Assumption Can Result in Biased Estimates for Non-Linear Mendelian Randomization](https://karger.com/hhe/article/88/1/79/862215/Violation-of-the-Constant-Genetic-Effect) (why DR stratification outperform)  
+TBA (Nonlinear MR)  
+[A data-adaptive method for investigating effect heterogeneity with high-dimensional covariates in Mendelian randomization](https://link.springer.com/article/10.1186/s12874-024-02153-1)
+(high-dim effect heterogeneity)
+
+⚠️ One-sample individual-level data is required. This is not a drawback, as DRMR provides much more informative results that are not attainable through any summary-data method.  
+⚠️ All effect heterogeneity analyses can be robust to unreliable DR stratification. Even if DR stratification is unreliable, your effect heterogeneity results (those from RFQT) are typically not affected. The usage of DRMR and RFQT is not determined by whether or not DR stratification is reliable
 
 
-See [Real application](#real-application) for the guidance with your real data  
-See [FAQs](#faqs) for the frequently asked questions or contact me for suggestions
+The remaining part will demonstrate the fundamental concepts of DR stratification and provide a simple, step-by-step guide for applying this method. You may want to skip, and directly see  
+👉 [Real application](#real-application) for the guidance with your real data  
+👉 [FAQs](#faqs) for the frequently asked questions (remember you can always contact me for specific suggestions)
 
 ## Stratification
 When examining potential non-linear causal effects, one approach is to divide the population into multiple subgroups or strata, each with varying levels of exposure. IV analysis can then be applied to each stratum, and the stratum-specific IV estimates can reveal the underlying shape of the causal effect. There are three main stratification methods:
-|             | Naive stratification |Residual stratification[^R] |Doubly-ranked stratification[^DR] |
+|             | Naive stratification |Residual stratification |Doubly-ranked stratification |
 | ----------- | ----------- | ----------- | ----------- |
 | Discription | Directly stratify on the exposure level.  |First build the 'residual exposure' by regressing the exposure on the instrument and do the naive-style stratification on the residual values      |First rank the instrument values to form pre-stratum, then rank the exposure values to form stratum (see schematic diagram below)     |
 | Potential Issues    | The exposure is often the common effect of the instrument and the confounders. Therefore, stratifying or conditioning on the common effect may introduce collider bias[^collider], and violate the exchangeability of the strata.      | Residual stratification requires strong parametric assumptions; for exmaple, the linearity and homogeneity assumption of the instrument-exposure model |       |
 
 [^collider]: https://academic.oup.com/ije/article/39/2/417/680407
-[^R]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4222800/
-[^DR]: https://www.biorxiv.org/content/10.1101/2022.06.28.497930v1.abstract
+
 <img alt="DR" src="https://user-images.githubusercontent.com/127906571/229943653-cefbd6ad-fcd5-45a4-95b4-6530b4ea9836.png">
 
 Use the function `getDat()` to create a toy example, where you can experiment with different types of instruments (`IVtype`), instrument-exposure models (`ZXmodel`), and exposure-outcome models (`XYmodel`).
@@ -104,18 +119,18 @@ small values (<1.02) indicate a small degree of coarsenness.
 [^444]: See the Supplementary Text S2 of the origina doubly-ranked stratification paper
 
 
-## Different types of instrument
-The doubly-ranked stratification supports a wide variaty of instrument types, including dichotomous IV, discrete IV, high-dimensional IV, continuous IV, mixture IVs. For single IV, just denote its value by `Z` in `dat`. For high-dimensional IV, integrate them as a weighted score (e.g. the weigthed gene score in MR). For exmaple
+## Different types of instruments
+The doubly-ranked stratification supports a wide variety of instrument types, including dichotomous IV, discrete IV, high-dimensional IV, continuous IV, mixture IVs. For single IV, just denote its value by `Z` in `dat`. For high-dimensional IV, integrate them as a weighted score (e.g. the weighted gene score in MR). For exmaple
 ```R
 dat$Z<-lm(  dat$X~ dat$G1+ dat$G2 + ...   )$fitted  #G1 G2 ... are genetic variants
 ```
 
 ## Other outcome types
-If you outcome is not or cannot transoformed to a continous outcome with simple linear model, you may need use other models[^outcometype]. For exmaple, if you outcome is a binary, you can adjust the fitting model using the argument `family_used`
+If your outcome is not or cannot be transformed to a continuous outcome with a simple linear model, you may need to use other models[^outcometype]. For example, if your outcome is a binary, you can adjust the fitting model using the argument `family_used`
 ```R
 getSummaryInf( rdat,family_used='binomial')
 ```
-[^outcometype]: Some outcome types are tricky, contact me to discuss the most appropriate model
+[^outcometype]: Some outcome types are tricky; contact me to discuss the most appropriate model
 
 ## Covariate adjustment
 If you need to adjust for covariates, add them to your data `dat` or `rdat` with the name `C1`, `C2`, etc. Ensure that the data type is correct as the fitting will follow the rules of the `lm` function[^lm]. To enable covariate adjustment, set the argument `covariate=TRUE`.
@@ -126,7 +141,7 @@ getSummaryInf( rdat,covariate=TRUE)
 [^lm]: All character variables will be treated as factor variables, and corresponding dummy variables will be created to fit in `lm`. If a continuous variable is in character form, it should be transformed into a numerical format before being used in the analysis.
 
 ## Control the randomness and reproducibility
-One feature of the stratification in the DRMR package is that the stratification function will not introduce randomness (in the sense that the same input data will always generate the same stratification results)[^randomness]. This is beneficial in terms of transparency and reproducibility. However, since ties are broken at random for constant instrument or exposure values, the randomness of such breaks may be considered in some analysis. You can use the argument `seed` to create and track the randomness, For example:  
+One feature of the stratification in the DRMR package is that the stratification function will not introduce randomness (in the sense that the same input data will always generate the same stratification results)[^randomness]. This is beneficial in terms of transparency and reproducibility. However, since ties are broken at random for constant instrument or exposure values, the randomness of such breaks may be considered in some analyses. You can use the argument `seed` to create and track the randomness. For example:  
 ```R
 Stratify(dat)
 Stratify(dat,seed=1)
