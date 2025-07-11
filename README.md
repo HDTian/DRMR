@@ -27,11 +27,11 @@ you can also try the [SUMnlmr](https://github.com/amymariemason/SUMnlmr) package
 Related papers:  
 [Relaxing parametric assumptions for non-linear Mendelian randomization using a doubly-ranked stratification method](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1010823) (DR stratification)  
 [Violation of the Constant Genetic Effect Assumption Can Result in Biased Estimates for Non-Linear Mendelian Randomization](https://karger.com/hhe/article/88/1/79/862215/Violation-of-the-Constant-Genetic-Effect) (why DR stratification outperform)  
-TBA (Nonlinear MR)  
+[Stratification-based Instrumental Variable Analysis Framework for Nonlinear Effect Analysis](https://arxiv.org/html/2507.07349v1) (Nonlinear MR)  
 [A data-adaptive method for investigating effect heterogeneity with high-dimensional covariates in Mendelian randomization](https://link.springer.com/article/10.1186/s12874-024-02153-1)
 (high-dim effect heterogeneity)
 
-⚠️ One-sample individual-level data is required. This is not a drawback, as DRMR provides much more informative results that are not attainable through any summary-data method  
+⚠️ One-sample individual-level data is required. This may not be a drawback, as DRMR provides much more informative results that are not attainable through any summary-data method  
 ⚠️ All effect heterogeneity analyses can be robust to unreliable DR stratification. Even if DR stratification is unreliable, your effect heterogeneity results (those from RFQT) are typically not affected. The usage of DRMR and RFQT is not determined by whether or not DR stratification is reliable
 
 
