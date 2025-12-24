@@ -44,7 +44,7 @@ When examining potential non-linear causal effects, one approach is to divide th
 |             | Naive stratification |Residual stratification |Doubly-ranked stratification |
 | ----------- | ----------- | ----------- | ----------- |
 | Discription | Directly stratify on the exposure level.  |First build the 'residual exposure' by regressing the exposure on the instrument and do the naive-style stratification on the residual values      |First rank the instrument values to form pre-stratum, then rank the exposure values to form stratum (see schematic diagram below)     |
-| Potential Issues    | The exposure is often the common effect of the instrument and the confounders. Therefore, stratifying or conditioning on the common effect may introduce collider bias[^collider], and violate the exchangeability of the strata.      | Residual stratification requires strong parametric assumptions; for exmaple, the linearity and homogeneity assumption of the instrument-exposure model |       |
+| Potential Issues    | The exposure is often the common effect of the instrument and the confounders. Therefore, stratifying or conditioning on the common effect may introduce collider bias[^collider], and violate the exchangeability of the strata.      | Residual stratification requires strong parametric assumptions; for exmaple, the linearity and homogeneity assumption of the instrument-exposure model |  DR stratification requires the rank preserving assumption, which may be violated particularly when there exits strong G*E modification       |
 
 [^collider]: https://academic.oup.com/ije/article/39/2/417/680407
 
