@@ -5,7 +5,7 @@
 Stratification
 }
 \description{
-Do doubly-ranked and residual stratification on a data
+Do doubly-ranked or/and residual stratification on a data
 }
 \usage{
 Stratify(dat, onExposure = TRUE, Ns = 10, SoP = NA, seed = NA)
@@ -13,7 +13,19 @@ Stratify(dat, onExposure = TRUE, Ns = 10, SoP = NA, seed = NA)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dat}{
-a dataset to be stratified.
+a dataset to be stratified. It is important to ensure that the column names match the required naming conventions for the function to work properly:
+
+The instrument: Z
+
+The exposure: X
+
+The outcome: Y
+
+(if applicable) the covariate to stratify: M
+
+(if applicable) the covariate to adjust: C1, C2, C3, ...
+
+Note that the stratification is only about the instrument and exposure (or covariate if you wish to stratigy on covariate), so you do not really need other variales on the stratification stage.
 }
   \item{onExposure}{
 Logic value to determine whether stratification is done on exposure or not. If \code{onExposure=FALSE}, the covariate rather than the exposure will be stratified on. Default value is \code{onExposure==TRUE}.
