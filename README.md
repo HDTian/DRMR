@@ -3,7 +3,7 @@
 
 *Latest updated: Apr/04/2025*
 
-Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing homogeneity assumption, conducting nonlinear causal studies, and heterogeneous effects studies. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification results (also well connected with [RFQT](https://github.com/HDTian/RFQT) and [SSS](https://github.com/HDTian/SSS) packages). 
+Doubly-ranked (DR) stratification is a nonparametric, simple yet powerful method for instrument variable (IV) analysis and Mendelian randomization (MR) studies to create sub-groups, known as "strata", in which the IV assumption is satisfied. DR stratification can be applied in a wide range of IV or MR studies, including assessing the homogeneity assumption, conducting nonlinear causal studies, and heterogeneous effects studies. The DRMR package can assist in generating stratifications, providing relevant results, and supporting further analysis based on stratification results (also well connected with [RFQT](https://github.com/HDTian/RFQT) and [SSS](https://github.com/HDTian/SSS) packages). 
 
 By using the DRMR package, you will activate stratification-based analysis, allowing you:  
 ✅ drawing nonlinear IV/MR analysis  
@@ -44,7 +44,7 @@ The remaining part will demonstrate the fundamental concepts of DR stratificatio
 When examining potential non-linear causal effects, one approach is to divide the population into multiple subgroups or strata, each with varying levels of exposure. IV analysis can then be applied to each stratum, and the stratum-specific IV estimates can reveal the underlying shape of the causal effect. There are three main stratification methods:
 |             | Naive stratification |Residual stratification |Doubly-ranked stratification |
 | ----------- | ----------- | ----------- | ----------- |
-| Discription | Directly stratify on the exposure level.  |First build the 'residual exposure' by regressing the exposure on the instrument and do the naive-style stratification on the residual values      |First rank the instrument values to form pre-stratum, then rank the exposure values to form stratum (see schematic diagram below)     |
+| Description | Directly stratify on the exposure level.  |First build the 'residual exposure' by regressing the exposure on the instrument and do the naive-style stratification on the residual values      |First rank the instrument values to form pre-stratum, then rank the exposure values to form stratum (see schematic diagram below)     |
 | Potential Issues    | The exposure is often the common effect of the instrument and the confounders. Therefore, stratifying or conditioning on the common effect may introduce collider bias[^collider], and violate the exchangeability of the strata.      | Residual stratification requires strong parametric assumptions; for example, the linearity and homogeneity assumption of the instrument-exposure model |  DR stratification requires the rank preserving assumption, which may be violated particularly when there exists strong G*E modification       |
 
 [^collider]: https://academic.oup.com/ije/article/39/2/417/680407
@@ -93,7 +93,7 @@ getSummaryInf( rdat,onlyDR=TRUE)
 ## Stratify on other covariates
 If you need to stratify on a covariate (which is common in many heterogeneous effect studies[^HTE]), first define the covariate to be stratified by as `M` in `dat`, and then simply run the following code.
 ```R
-dat$M<-covarite_vector  #added the covariate information
+dat$M<- covariate_vector  #added the covariate information
 rdat<-Stratify(dat,onExposure=FALSE) 
 getSummaryInf( rdat)
 ```
@@ -101,7 +101,7 @@ getSummaryInf( rdat)
 [^HTE]: https://link.springer.com/article/10.1007/s10654-022-00879-0
 
 ## Stratify on coarsened exposures
-The coarsened exposure refers to the exposure measured with discrete values that are considered as an approximation for its latent continuous values. Such values could be rounded, binned into categories, or truncated, and all of them should satisfy the rank preserving condition[^444]. The properties of such coarsened exposure enable the use of doubly-ranked stratification, but extra assessment for the degree of coarseness should be done before stratification. One way to do this is by calculating the Gelman-Rubin uniformity values of the rank index in each stratum. You can run the following code to perform this assessment.
+The coarsened exposure refers to the exposure measured with discrete values that are considered as an approximation for its latent continuous values. Such values could be rounded, binned into categories, or truncated, and all of them should satisfy the rank-preserving condition[^444]. The properties of such coarsened exposure enable the use of doubly-ranked stratification, but extra assessment for the degree of coarseness should be done before stratification. One way to do this is by calculating the Gelman-Rubin uniformity values of the rank index in each stratum. You can run the following code to perform this assessment.
 ```R
 getGRstats(rdat)
 
@@ -114,10 +114,10 @@ getGRstats(rdat)
 #       ...
 
 ```
-small values (<1.02) indicate a small degree of coarsenness.
+small values (<1.02) indicate a small degree of coarseness.
 
 
-[^444]: See the Supplementary Text S2 of the origina doubly-ranked stratification paper
+[^444]: See the Supplementary Text S2 of the original doubly-ranked stratification paper
 
 
 ## Different types of instruments
@@ -189,7 +189,7 @@ The DRMR package follows a one-argument style, which means that in principle all
 is.data.frame(your_prepared_dat)
 dat<-as.data.frame(your_prepared_dat)
 ```
-The DRMR package does not require you to specify instruments, exposures, or outcomes as arguments. The functions will automatically draw stratification and perform related analysis based on the column names of the inputted dataframe. It is important to ensure that the column names match the required naming conventions for the function to work properly.:
+The DRMR package does not require you to specify instruments, exposures, or outcomes as arguments. The functions will automatically draw stratification and perform related analysis based on the column names of the input dataframe. It is important to ensure that the column names match the required naming conventions for the function to work properly.:
 - The instrument: `Z` (see the 'Different types of instrument' section if your instrument is complex)
 - The exposure: `X`
 - The outcome: `Y`
@@ -219,11 +219,11 @@ then you can use the information in `RES` and `smooth_res` (try `?Stratify`, `?g
 [^further]: Feel free to contact me if you have any further questions or need additional information that the current function cannot provide. I would be happy to discuss your study further and provide any assistance you may need.
 
 ## FAQs
-(Q1) How to selected the appropriate value of "Norder" in "Smooth" function? Should it based on the AIC or BIC of the model (smooth_res)?<br>
+(Q1) How to select the appropriate value of "Norder" in "Smooth" function? Should it based on the AIC or BIC of the model (smooth_res)?<br>
 (A1) 'Norder' is a value controlling how flexible your fitted curve (ie effect shape) can be. There are many ways to determine it - even relying on your domain knowledge. AIC/BIC given here is also for 'Norder' selection, so you can choose your 'Norder' by, say, choosing the smallest AIC or BIC value.
 
 (Q2) What is the difference between "smooth_res1$hp" and "smooth_res1$p"?<br>
-(A2) Both 'smooth_res1$hp' and 'smooth_res1$p' returns you the fitted curve (ie effect shape). $hp returns you the original effect shape, while $p returns you the differentiated effect shape. So technically, $hp is the integral curve of $p. I personally prefer to use $p as the differentiated effect shape plot directly reflects the effect size at the corresponding local exposure value point
+(A2) Both 'smooth_res1$hp' and 'smooth_res1$p' return you the fitted curve (ie effect shape). $hp returns you the original effect shape, while $p returns you the differentiated effect shape. So technically, $hp is the integral curve of $p. I personally prefer to use $p as the differentiated effect shape plot directly reflects the effect size at the corresponding local exposure value point
 
 (Q3) How should I interpret the result when the exposure is a continuous variable and the outcome is a binary variable?<br>
 (A3) When your exposure is continuous and your outcome is binary and your model is the logistic model. The returned LACE estimate is targeted to the log odds ratio - so, say, if you wish to interpret OR (and its 95% CI) you can simply adopt an exponential transformation to them.
