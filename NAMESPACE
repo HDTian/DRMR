@@ -5,6 +5,7 @@ export(getGRstats)
 export(getSummaryInf)
 export(Smooth)
 export(Stratify)
+export(DR_RubinRule)
 
 importFrom(dplyr,arrange)
 import(fda)
