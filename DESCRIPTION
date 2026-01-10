@@ -1,9 +1,9 @@
 Package: DRMR
 Type: Package
 Title: Doubly-Ranked Stratification in Mendelian Randomization
-Version: 0.1.0
+Version: 0.2.0
 Author: Haodong Tian
-Maintainer:  Haodong Tian <haodong.tian@mrc-bsu.cam.ac.uk>
+Maintainer:  Haodong Tian <htian2@mgh.harvard.edu>
 Description: Doubly-ranked and residual stratification for instrumental variable and Mendelian randomization studies and further stratification-based analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
